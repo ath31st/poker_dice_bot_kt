@@ -15,6 +15,8 @@ object AppKt {
     // 1. bot token
     @JvmStatic
     fun main(args: Array<String>) {
+        DatabaseFactory.init()
+
         logger.info("application starting...")
         val botToken = args[0]
 
