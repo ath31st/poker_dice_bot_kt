@@ -1,18 +1,12 @@
 package util;
 
-import static util.Combination.FULL_HOUSE;
-import static util.Combination.LARGE_STRAIGHT;
-import static util.Combination.PAIR;
-import static util.Combination.POKER;
-import static util.Combination.SET;
-import static util.Combination.SMALL_STRAIGHT;
-import static util.Combination.SQUARE;
-import static util.Combination.TWO_PAIR;
 import static util.Command.FINISH;
 import static util.Command.PASS;
 import static util.Command.REROLL;
 import static util.Command.ROLL;
 import static util.Command.START;
+
+import org.example.botfarm.util.Combination;
 
 public enum MessageEnum {
   TABLE_BUSY("Извините, игровой стол сейчас занят"),
@@ -40,14 +34,14 @@ public enum MessageEnum {
       "в другой текстовый канал для запуска раунда."),
 
   COMBINATION("Комбинации:\n" +
-      POKER.value + " - 5 одинаковых костей.\n" +
-      SQUARE.value + " - 4 кости выпали одной и той же стороной.\n" +
-      FULL_HOUSE.value + " - две кости одного, три кости другого номинала.\n" +
-      LARGE_STRAIGHT.value + " - все 5 костей идут по порядку возрастания начиная с 2\n" +
-      SMALL_STRAIGHT.value + " - все 5 костей идут по порядку возрастания начиная с 1\n" +
-      SET.value + " - 3 кости с одинаковыми номиналами.\n" +
-      TWO_PAIR.value + " - две кости одного номинала и еще две кости другого.\n" +
-      PAIR.value + " - две кости ложатся одной и той же стороной.\n" +
+      Combination.POKER.getValue() + " - 5 одинаковых костей.\n" +
+      Combination.SQUARE.getValue() + " - 4 кости выпали одной и той же стороной.\n" +
+      Combination.FULL_HOUSE.getValue() + " - две кости одного, три кости другого номинала.\n" +
+      Combination.LARGE_STRAIGHT.getValue() + " - все 5 костей идут по порядку возрастания начиная с 2\n" +
+      Combination.SMALL_STRAIGHT.getValue() + " - все 5 костей идут по порядку возрастания начиная с 1\n" +
+      Combination.SET.getValue() + " - 3 кости с одинаковыми номиналами.\n" +
+      Combination.TWO_PAIR.getValue() + " - две кости одного номинала и еще две кости другого.\n" +
+      Combination.PAIR.getValue() + " - две кости ложатся одной и той же стороной.\n" +
       "**Примечание.** В случае, когда у игроков одинаковые комбинации, например 2 покера, победителем считается тот, " +
       "у кого комбинация в сумме дает больше очков.\n");
 
