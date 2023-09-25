@@ -4,9 +4,11 @@ import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.telegramError
-import com.github.kotlintelegrambot.dispatcher.text
 import com.github.kotlintelegrambot.entities.ChatId
+import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.logging.LogLevel
+import org.example.botfarm.util.Command
+import org.example.botfarm.util.MessageEnum
 import org.slf4j.LoggerFactory
 
 object AppKt {
@@ -24,11 +26,18 @@ object AppKt {
             logLevel = LogLevel.Error
             token = botToken
             dispatch {
-                text {
-                    val chatId = ChatId.fromId(update.message!!.chat.id)
+                command(Command.HELP.value) {
                     bot.sendMessage(
-                        chatId = chatId,
-                        text = message.text!!
+                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        parseMode = ParseMode.MARKDOWN,
+                        text = MessageEnum.HELP.value
+                    )
+                }
+                command(Command.COMBINATION.value) {
+                    bot.sendMessage(
+                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        parseMode = ParseMode.MARKDOWN,
+                        text = MessageEnum.COMBINATION.value
                     )
                 }
                 command("start") {
