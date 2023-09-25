@@ -1,4 +1,4 @@
-package org.example.botfarm
+package org.example.botfarm.entity
 
 import org.jetbrains.exposed.sql.Table
 

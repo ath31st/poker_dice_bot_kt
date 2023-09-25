@@ -1,0 +1,8 @@
+database:
+  url: jdbc:sqlite:./poker_dice_kt.db
+  driver-class-name: org.sqlite.JDBC
+  username: admin
+  password: admin
+
+round:
+  duration: 5

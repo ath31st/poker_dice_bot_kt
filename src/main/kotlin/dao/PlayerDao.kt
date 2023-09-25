@@ -1,4 +1,6 @@
-package org.example.botfarm
+package org.example.botfarm.dao
+
+import org.example.botfarm.entity.Player
 
 interface PlayerDao {
     suspend fun allPlayers(): List<Player>
