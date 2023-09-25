@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.example.botfarm.entity.RoundResult;
 
 public class DiceUtil {
   public static int generateRandomInteger(int min, int max) {
