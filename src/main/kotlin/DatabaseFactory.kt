@@ -2,6 +2,7 @@ package org.example.botfarm
 
 import kotlinx.coroutines.Dispatchers
 import org.example.botfarm.entity.Players
+import org.example.botfarm.entity.Results
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -15,6 +16,7 @@ object DatabaseFactory {
 
         transaction(database) {
             SchemaUtils.create(Players)
+            SchemaUtils.create(Results)
         }
     }
 

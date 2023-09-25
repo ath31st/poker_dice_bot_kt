@@ -2,6 +2,7 @@ package org.example.botfarm
 
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
+import com.github.kotlintelegrambot.dispatcher.channel
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.telegramError
 import com.github.kotlintelegrambot.entities.ChatId
@@ -26,19 +27,21 @@ object AppKt {
             logLevel = LogLevel.Error
             token = botToken
             dispatch {
-                command(Command.HELP.value) {
-                    bot.sendMessage(
-                        chatId = ChatId.fromId(update.message!!.chat.id),
-                        parseMode = ParseMode.MARKDOWN,
-                        text = MessageEnum.HELP.value
-                    )
-                }
-                command(Command.COMBINATION.value) {
-                    bot.sendMessage(
-                        chatId = ChatId.fromId(update.message!!.chat.id),
-                        parseMode = ParseMode.MARKDOWN,
-                        text = MessageEnum.COMBINATION.value
-                    )
+                channel {
+                    if (channelPost.text == Command.HELP.value) {
+                        bot.sendMessage(
+                            chatId = ChatId.fromId(channelPost.chat.id),
+                            parseMode = ParseMode.MARKDOWN,
+                            text = MessageEnum.HELP.value
+                        )
+                    }
+                    if (channelPost.text == Command.COMBINATION.value) {
+                        bot.sendMessage(
+                            chatId = ChatId.fromId(channelPost.chat.id),
+                            parseMode = ParseMode.MARKDOWN,
+                            text = MessageEnum.COMBINATION.value
+                        )
+                    }
                 }
                 command("start") {
                     bot.sendMessage(
