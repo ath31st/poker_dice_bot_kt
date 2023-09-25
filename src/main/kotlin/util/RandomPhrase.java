@@ -2,9 +2,7 @@ package util;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.experimental.UtilityClass;
 
-@UtilityClass
 public class RandomPhrase {
   private static final List<String> autoPass = new ArrayList<>();
   private static final List<String> rollDices = new ArrayList<>();

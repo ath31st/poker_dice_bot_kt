@@ -1,18 +1,18 @@
 package util;
 
-import static bot.farm.pd.util.Combination.FULL_HOUSE;
-import static bot.farm.pd.util.Combination.LARGE_STRAIGHT;
-import static bot.farm.pd.util.Combination.PAIR;
-import static bot.farm.pd.util.Combination.POKER;
-import static bot.farm.pd.util.Combination.SET;
-import static bot.farm.pd.util.Combination.SMALL_STRAIGHT;
-import static bot.farm.pd.util.Combination.SQUARE;
-import static bot.farm.pd.util.Combination.TWO_PAIR;
-import static bot.farm.pd.util.Command.FINISH;
-import static bot.farm.pd.util.Command.PASS;
-import static bot.farm.pd.util.Command.REROLL;
-import static bot.farm.pd.util.Command.ROLL;
-import static bot.farm.pd.util.Command.START;
+import static util.Combination.FULL_HOUSE;
+import static util.Combination.LARGE_STRAIGHT;
+import static util.Combination.PAIR;
+import static util.Combination.POKER;
+import static util.Combination.SET;
+import static util.Combination.SMALL_STRAIGHT;
+import static util.Combination.SQUARE;
+import static util.Combination.TWO_PAIR;
+import static util.Command.FINISH;
+import static util.Command.PASS;
+import static util.Command.REROLL;
+import static util.Command.ROLL;
+import static util.Command.START;
 
 public enum MessageEnum {
   TABLE_BUSY("Извините, игровой стол сейчас занят"),
