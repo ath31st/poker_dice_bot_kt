@@ -37,7 +37,8 @@ object AppKt {
                 command(Command.START.value) {
                     val groupId = update.message!!.chat.id
                     val playerInitiator = update.message!!.from!!.id
-                    val playerName = update.message!!.from!!.firstName //TODO firstName may be NULL
+                    val playerName = update.message!!.from!!.firstName.isBlank()
+                        .let { update.message!!.from!!.username!! }
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),
                         text = roundService.startNewRound(groupId, playerInitiator, playerName)
@@ -46,7 +47,7 @@ object AppKt {
                 command(Command.ROLL.value) {
                     bot.sendMessage(
                         chatId = ChatId.fromId(update.message!!.chat.id),
-                        text = "Roll!"
+                        text = roundService.rollDices(update.message!!)
                     )
                 }
                 command(Command.REROLL.value) {

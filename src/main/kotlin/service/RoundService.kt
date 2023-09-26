@@ -1,11 +1,15 @@
 package org.example.botfarm.service
 
+import com.github.kotlintelegrambot.entities.Message
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.botfarm.entity.PlayerInRound
 import org.example.botfarm.entity.PokerRound
+import org.example.botfarm.util.DiceUtil
 import org.example.botfarm.util.MessageEnum
+import org.example.botfarm.util.RandomPhrase
+import org.example.botfarm.util.StringUtil
 import java.util.concurrent.ConcurrentMap
 
 class RoundService(
@@ -13,7 +17,7 @@ class RoundService(
     private val resultService: ResultService,
     private val rounds: ConcurrentMap<Long, PokerRound>
 ) {
-    suspend fun startNewRound(groupId: Long, playerInitiator: Long, playerName: String): String {
+    fun startNewRound(groupId: Long, playerInitiator: Long, playerName: String): String {
         if (rounds.containsKey(groupId)) {
             return MessageEnum.TABLE_BUSY.value
         }
@@ -32,5 +36,51 @@ class RoundService(
         )
 
         return MessageEnum.START_ROUND.value.format(playerName)
+    }
+
+    suspend fun rollDices(message: Message): String {
+        var result = ""
+        val groupId: Long = message.chat.id
+        val playerId: Long = message.from!!.id
+        if (checkRoundAvailable(groupId, playerId)) {
+            val pr = rounds[groupId]
+            pr!!.actionCounter = pr.actionCounter + 2
+
+            val playerName = message.from!!.firstName.isBlank().let { message.from!!.username!! }
+
+            if (!playerService.existsPlayer(playerId)) {
+                playerService.addNewPlayer(
+                    playerId,
+                    message.from!!.username.let { "" },
+                    message.from!!.firstName.let { "" },
+                    message.from!!.lastName.let { "" }
+                )
+            } else {
+
+                playerService.checkAndUpdateNickname(playerId, playerName)
+            }
+            val rollDices: IntArray = DiceUtil.roll5d6()
+
+            val pir = playerService.createPiR()
+            pir.name = playerName
+            pir.dices = rollDices
+            pir.isRoll = false
+            pr.players[playerId] = pir
+            pr.actionCounter -= 1
+
+            result = RandomPhrase.getRollDicesPhrase()
+                .format(playerName, StringUtil.resultWithBrackets(rollDices))
+        }
+        return result
+    }
+
+    private fun checkRoundAvailable(groupId: Long, playerId: Long): Boolean {
+        val result: Boolean = if (!rounds.containsKey(groupId)) {
+            false
+        } else {
+            val pr = rounds[groupId]
+            !pr!!.isEnded && !pr.players.containsKey(playerId)
+        }
+        return result
     }
 }
