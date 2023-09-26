@@ -14,16 +14,16 @@ class PlayerService : PlayerDao {
     private fun resultRowToPlayer(row: ResultRow): Player {
         val player = Player()
         player.playerId = row[Players.id]
-        player.nickname = row[Players.nickname]
         player.username = row[Players.username]
-        player.discriminator = row[Players.discriminator]
+        player.firstName = row[Players.firstName]
+        player.lastName = row[Players.lastName]
         player.results = Results.select { Results.playerId eq row[Players.id] }
             .map {
                 Result(
                     resultId = it[Results.resultId],
                     player = player,
                     roundTime = it[Results.roundTime],
-                    idChannel = it[Results.idChannel]
+                    groupId = it[Results.groupId]
                 )
             }
         return player
@@ -43,11 +43,17 @@ class PlayerService : PlayerDao {
             .map(::resultRowToPlayer)
     }
 
-
-    override suspend fun addNewPlayer(username: String, nickname: String): Player? = dbQuery {
+    override suspend fun addNewPlayer(
+        playerId: Long,
+        username: String,
+        firstName: String,
+        lastName: String
+    ): Player? = dbQuery {
         val insertStatement = Players.insert {
+            it[id] = playerId
             it[Players.username] = username
-            it[Players.nickname] = nickname
+            it[Players.firstName] = firstName
+            it[Players.lastName] = lastName
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToPlayer)
     }

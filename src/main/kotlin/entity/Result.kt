@@ -8,14 +8,14 @@ class Result(
     val resultId: Long,
     val player: Player,
     val roundTime: LocalDateTime,
-    val idChannel: Long,
+    val groupId: Long,
 )
 
 object Results : Table("results") {
     val resultId = long("result_id").autoIncrement()
     val playerId = long("player_id") references Players.id
     val roundTime = datetime("round_time")
-    val idChannel = long("id_channel")
+    val groupId = long("group_id")
 
     override val primaryKey = PrimaryKey(resultId)
 }
