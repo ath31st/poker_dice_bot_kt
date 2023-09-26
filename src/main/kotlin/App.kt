@@ -2,7 +2,6 @@ package org.example.botfarm
 
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
-import com.github.kotlintelegrambot.dispatcher.channel
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.telegramError
 import com.github.kotlintelegrambot.entities.ChatId
@@ -27,26 +26,54 @@ object AppKt {
             logLevel = LogLevel.Error
             token = botToken
             dispatch {
-                channel {
-                    if (channelPost.text == Command.HELP.value) {
-                        bot.sendMessage(
-                            chatId = ChatId.fromId(channelPost.chat.id),
-                            parseMode = ParseMode.MARKDOWN,
-                            text = MessageEnum.HELP.value
-                        )
-                    }
-                    if (channelPost.text == Command.COMBINATION.value) {
-                        bot.sendMessage(
-                            chatId = ChatId.fromId(channelPost.chat.id),
-                            parseMode = ParseMode.MARKDOWN,
-                            text = MessageEnum.COMBINATION.value
-                        )
-                    }
-                }
-                command("start") {
+                command(Command.START.value) {
                     bot.sendMessage(
                         chatId = ChatId.fromId(update.message!!.chat.id),
-                        text = "Bot started"
+                        text = "Started!"
+                    )
+                }
+                command(Command.ROLL.value) {
+                    bot.sendMessage(
+                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        text = "Roll!"
+                    )
+                }
+                command(Command.REROLL.value) {
+                    bot.sendMessage(
+                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        text = "Reroll!"
+                    )
+                }
+                command(Command.PASS.value) {
+                    bot.sendMessage(
+                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        text = "Pass!"
+                    )
+                }
+                command(Command.FINISH.value) {
+                    bot.sendMessage(
+                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        text = "Finish!"
+                    )
+                }
+                command(Command.HELP.value) {
+                    bot.sendMessage(
+                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        parseMode = ParseMode.MARKDOWN,
+                        text = MessageEnum.HELP.value
+                    )
+                }
+                command(Command.COMBINATION.value) {
+                    bot.sendMessage(
+                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        parseMode = ParseMode.MARKDOWN,
+                        text = MessageEnum.COMBINATION.value
+                    )
+                }
+                command(Command.STATISTICS.value) {
+                    bot.sendMessage(
+                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        text = "Stat!"
                     )
                 }
                 telegramError {
