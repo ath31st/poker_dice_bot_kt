@@ -2,10 +2,7 @@ package org.example.botfarm.service
 
 import org.example.botfarm.DatabaseFactory.dbQuery
 import org.example.botfarm.dao.PlayerDao
-import org.example.botfarm.entity.Player
-import org.example.botfarm.entity.Players
-import org.example.botfarm.entity.Result
-import org.example.botfarm.entity.Results
+import org.example.botfarm.entity.*
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
@@ -64,5 +61,9 @@ class PlayerService : PlayerDao {
     override suspend fun deletePlayer(playerId: Long): Boolean = dbQuery {
         Players
             .deleteWhere { id eq playerId } > 0
+    }
+
+    fun createPiR(): PlayerInRound {
+        return PlayerInRound("", isRoll = true, isReroll = true, isPass = true, IntArray(5), 0)
     }
 }
