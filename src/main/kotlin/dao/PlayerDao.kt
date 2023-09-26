@@ -4,6 +4,8 @@ import org.example.botfarm.entity.Player
 
 interface PlayerDao {
     suspend fun existsPlayer(playerId: Long): Boolean
+    suspend fun existsByIdAndFirstName(playerId: Long, firstName: String): Boolean
+    suspend fun updateFirstNameById(playerId: Long, firstName: String): Int
     suspend fun player(playerId: Long): Player?
     suspend fun addNewPlayer(
         playerId: Long,

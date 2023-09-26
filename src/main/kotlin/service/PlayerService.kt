@@ -3,11 +3,8 @@ package org.example.botfarm.service
 import org.example.botfarm.DatabaseFactory.dbQuery
 import org.example.botfarm.dao.PlayerDao
 import org.example.botfarm.entity.*
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
 
 class PlayerService : PlayerDao {
 
@@ -61,6 +58,27 @@ class PlayerService : PlayerDao {
     override suspend fun deletePlayer(playerId: Long): Boolean = dbQuery {
         Players
             .deleteWhere { id eq playerId } > 0
+    }
+
+    override suspend fun existsByIdAndFirstName(playerId: Long, firstName: String): Boolean =
+        dbQuery {
+            Players
+                .select {
+                    (Players.id eq playerId) andIfNotNull (Players.firstName eq firstName)
+                }.count().toInt() == 1
+        }
+
+    override suspend fun updateFirstNameById(playerId: Long, firstName: String): Int =
+        dbQuery {
+            Players.update({ Players.id eq playerId }) { it[Players.firstName] = firstName }
+        }
+
+
+    suspend fun checkAndUpdateNickname(playerId: Long, firstName: String) {
+        if (!existsByIdAndFirstName(playerId, firstName)) {
+            updateFirstNameById(playerId, firstName)
+        }
+
     }
 
     fun createPiR(): PlayerInRound {
