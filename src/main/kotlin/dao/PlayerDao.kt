@@ -3,7 +3,7 @@ package org.example.botfarm.dao
 import org.example.botfarm.entity.Player
 
 interface PlayerDao {
-    suspend fun allPlayers(): List<Player>
+    suspend fun existsPlayer(playerId: Long): Boolean
     suspend fun player(playerId: Long): Player?
     suspend fun addNewPlayer(
         playerId: Long,

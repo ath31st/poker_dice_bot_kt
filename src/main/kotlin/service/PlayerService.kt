@@ -6,8 +6,11 @@ import org.example.botfarm.entity.Player
 import org.example.botfarm.entity.Players
 import org.example.botfarm.entity.Result
 import org.example.botfarm.entity.Results
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 
 class PlayerService : PlayerDao {
 
@@ -37,10 +40,10 @@ class PlayerService : PlayerDao {
             .singleOrNull()
     }
 
-    override suspend fun allPlayers(): List<Player> = dbQuery {
+    override suspend fun existsPlayer(playerId: Long): Boolean = dbQuery {
         Players
-            .selectAll()
-            .map(::resultRowToPlayer)
+            .select { Players.id eq playerId }
+            .count().toInt() == 1
     }
 
     override suspend fun addNewPlayer(
