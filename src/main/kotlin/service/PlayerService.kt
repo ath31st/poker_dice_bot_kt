@@ -34,6 +34,13 @@ class PlayerService : PlayerDao {
             .singleOrNull()
     }
 
+    override suspend fun playerName(playerId: Long): String = dbQuery {
+        Players
+            .select { Players.id eq playerId }
+            .map { it[Players.firstName].ifEmpty { it[Players.username] } }
+            .single()
+    }
+
     override suspend fun existsPlayer(playerId: Long): Boolean = dbQuery {
         Players
             .select { Players.id eq playerId }

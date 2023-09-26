@@ -7,6 +7,7 @@ interface PlayerDao {
     suspend fun existsByIdAndFirstName(playerId: Long, firstName: String): Boolean
     suspend fun updateFirstNameById(playerId: Long, firstName: String): Int
     suspend fun player(playerId: Long): Player?
+    suspend fun playerName(playerId: Long): String
     suspend fun addNewPlayer(
         playerId: Long,
         username: String,
