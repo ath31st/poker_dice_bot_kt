@@ -51,14 +51,14 @@ class RoundService(
             if (!playerService.existsPlayer(playerId)) {
                 playerService.addNewPlayer(
                     playerId,
-                    message.from!!.username.let { "" },
-                    message.from!!.firstName.let { "" },
-                    message.from!!.lastName.let { "" }
+                    username = message.from!!.username ?: "",
+                    firstName = message.from!!.firstName,
+                    lastName = message.from!!.lastName ?: ""
                 )
             } else {
-
-                playerService.checkAndUpdateNickname(playerId, playerName)
+                playerService.checkAndUpdateFirstName(playerId, playerName)
             }
+
             val rollDices: IntArray = DiceUtil.roll5d6()
 
             val pir = playerService.createPiR()

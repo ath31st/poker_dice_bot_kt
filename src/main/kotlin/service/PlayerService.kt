@@ -81,7 +81,7 @@ class PlayerService : PlayerDao {
         }
 
 
-    suspend fun checkAndUpdateNickname(playerId: Long, firstName: String) {
+    suspend fun checkAndUpdateFirstName(playerId: Long, firstName: String) {
         if (!existsByIdAndFirstName(playerId, firstName)) {
             updateFirstNameById(playerId, firstName)
         }
