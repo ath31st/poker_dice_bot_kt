@@ -80,8 +80,7 @@ class RoundService(
         val groupId: Long = message.chat.id
         val playerId: Long = message.from!!.id
         if (checkRerollOrPassAvailable(groupId, playerId)) {
-            // TODO rework regex!!!
-            val pattern = Pattern.compile(("^" + Command.REROLL.value) + "(\\s+[1-6]){1,5}$")
+            val pattern = Pattern.compile(("^/" + Command.REROLL.value) + "(\\s+[1-6]){1,5}$")
             val matcher = pattern.matcher(message.text!!)
             if (matcher.matches()) {
                 val pr = rounds[groupId]

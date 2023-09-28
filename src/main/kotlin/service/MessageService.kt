@@ -1,8 +1,13 @@
 package org.example.botfarm.service
 
+import org.example.botfarm.entity.PlayerInRound
+import org.example.botfarm.entity.RoundResult
+import org.example.botfarm.util.DiceUtil
 import org.example.botfarm.util.MessageEnum
 import org.example.botfarm.util.RandomPhrase
 import org.example.botfarm.util.StringUtil
+import java.util.Map.Entry.comparingByValue
+import java.util.stream.Collectors
 
 class MessageService {
     fun prepareTextAfterStartingRound(isSuccessStart: Boolean, playerName: String): String {
@@ -39,5 +44,23 @@ class MessageService {
             )
         }
         return text
+    }
+
+    fun prepareResultText(
+        result: Map<Long, RoundResult>,
+        players: Map<Long, PlayerInRound>
+    ) {
+        """
+     =====================
+     Результаты раунда:
+     ```
+     """.trimIndent() +
+                result.entries
+                    .stream()
+                    .sorted(comparingByValue(DiceUtil::customComparator))
+                    .map { (key, value): Map.Entry<Long, RoundResult> ->
+                        "${players[key]?.name}: ${value.combination.value} {${value.score}}"
+                    }
+                    .collect(Collectors.joining("\n")) + "```"
     }
 }
