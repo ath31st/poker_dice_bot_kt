@@ -18,36 +18,36 @@ class RoundService(
     private val scoreService: ScoreService,
     private val rounds: ConcurrentMap<Long, PokerRound>
 ) {
-    fun startNewRound(groupId: Long, playerInitiator: Long, playerName: String): String {
+    fun startNewRound(groupId: Long, playerInitiator: Long): Boolean {
+        val isSuccessfulStart: Boolean
         if (rounds.containsKey(groupId)) {
-            return MessageEnum.TABLE_BUSY.value
+            isSuccessfulStart = false
+        } else {
+            val players = HashMap<Long, PlayerInRound>()
+
+            val instant = Clock.System.now()
+            val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+
+            rounds[groupId] = PokerRound(
+                playerInitiator,
+                isEnded = false,
+                groupId,
+                players,
+                localDateTime,
+                actionCounter = 0
+            )
+            isSuccessfulStart = true
         }
-        val players = HashMap<Long, PlayerInRound>()
-
-        val instant = Clock.System.now()
-        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-
-        rounds[groupId] = PokerRound(
-            playerInitiator,
-            isEnded = false,
-            groupId,
-            players,
-            localDateTime,
-            actionCounter = 0
-        )
-
-        return MessageEnum.START_ROUND.value.format(playerName)
+        return isSuccessfulStart
     }
 
-    suspend fun rollDices(message: Message): String {
-        var result = ""
+    suspend fun rollDices(message: Message, playerName: String): IntArray {
+        var rollDices = intArrayOf()
         val groupId: Long = message.chat.id
         val playerId: Long = message.from!!.id
         if (checkRoundAvailable(groupId, playerId)) {
             val pr = rounds[groupId]
             pr!!.actionCounter = pr.actionCounter + 2
-
-            val playerName = message.from!!.firstName.isBlank().let { message.from!!.username!! }
 
             if (!playerService.existsPlayer(playerId)) {
                 playerService.addNewPlayer(
@@ -60,7 +60,7 @@ class RoundService(
                 playerService.checkAndUpdateFirstName(playerId, playerName)
             }
 
-            val rollDices: IntArray = DiceUtil.roll5d6()
+            rollDices = DiceUtil.roll5d6()
 
             val pir = playerService.createPiR()
             pir.name = playerName
@@ -68,15 +68,11 @@ class RoundService(
             pir.isRoll = false
             pr.players[playerId] = pir
             pr.actionCounter -= 1
-
-            result = RandomPhrase.getRollDicesPhrase()
-                .format(playerName, StringUtil.resultWithBrackets(rollDices))
         }
-        return result
+        return rollDices
     }
 
     suspend fun rerollDices(message: Message): String {
-        var result = ""
         val groupId: Long = message.chat.id
         val playerId: Long = message.from!!.id
         if (checkRerollOrPassAvailable(groupId, playerId)) {

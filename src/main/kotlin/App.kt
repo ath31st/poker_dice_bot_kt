@@ -8,10 +8,7 @@ import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.logging.LogLevel
 import org.example.botfarm.entity.PokerRound
-import org.example.botfarm.service.PlayerService
-import org.example.botfarm.service.ResultService
-import org.example.botfarm.service.RoundService
-import org.example.botfarm.service.ScoreService
+import org.example.botfarm.service.*
 import org.example.botfarm.util.Command
 import org.example.botfarm.util.MessageEnum
 import org.slf4j.LoggerFactory
@@ -27,6 +24,7 @@ object AppKt {
     fun main(args: Array<String>) {
         DatabaseFactory.init()
         val roundService = RoundService(PlayerService(), ResultService(), ScoreService(), rounds)
+        val messageService = MessageService()
 
         logger.info("application starting...")
         val botToken = args[0]
@@ -40,15 +38,22 @@ object AppKt {
                     val playerInitiator = update.message!!.from!!.id
                     val playerName = update.message!!.from!!.firstName.isBlank()
                         .let { update.message!!.from!!.username!! }
+                    val isSuccessfulStart = roundService.startNewRound(groupId, playerInitiator)
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),
-                        text = roundService.startNewRound(groupId, playerInitiator, playerName)
+                        text = messageService.prepareTextAfterStartingRound(
+                            isSuccessfulStart,
+                            playerName
+                        )
                     )
                 }
                 command(Command.ROLL.value) {
+                    val playerName =
+                        message.from!!.firstName.isBlank().let { message.from!!.username!! }
+                    val rollDices = roundService.rollDices(update.message!!, playerName)
                     bot.sendMessage(
                         chatId = ChatId.fromId(update.message!!.chat.id),
-                        text = roundService.rollDices(update.message!!)
+                        text = messageService.prepareTextAfterRollDices(rollDices, playerName)
                     )
                 }
                 command(Command.REROLL.value) {
