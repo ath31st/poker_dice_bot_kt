@@ -57,9 +57,16 @@ object AppKt {
                     )
                 }
                 command(Command.REROLL.value) {
+                    val playerName =
+                        message.from!!.firstName.isBlank().let { message.from!!.username!! }
+                    val rolls = roundService.rerollDices(message)
                     bot.sendMessage(
                         chatId = ChatId.fromId(update.message!!.chat.id),
-                        text = "Reroll!"
+                        text = messageService.prepareTextAfterRerollDices(
+                            rolls.first,
+                            rolls.second,
+                            playerName
+                        )
                     )
                 }
                 command(Command.PASS.value) {

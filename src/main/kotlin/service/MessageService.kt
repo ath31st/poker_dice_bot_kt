@@ -22,4 +22,22 @@ class MessageService {
         }
         return text
     }
+
+    fun prepareTextAfterRerollDices(
+        firstRoll: IntArray,
+        reroll: IntArray,
+        playerName: String
+    ): String {
+        val text = if (firstRoll.isEmpty() || reroll.isEmpty()) {
+            ""
+        } else {
+            String.format(
+                RandomPhrase.getRerollPhrase(),
+                playerName,
+                StringUtil.resultWithBrackets(reroll),
+                StringUtil.resultWithBrackets(firstRoll)
+            )
+        }
+        return text
+    }
 }

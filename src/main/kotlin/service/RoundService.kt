@@ -7,7 +7,9 @@ import kotlinx.datetime.toLocalDateTime
 import org.example.botfarm.entity.PlayerInRound
 import org.example.botfarm.entity.PokerRound
 import org.example.botfarm.entity.RoundResult
-import org.example.botfarm.util.*
+import org.example.botfarm.util.Command
+import org.example.botfarm.util.DiceUtil
+import org.example.botfarm.util.StringUtil
 import java.util.Map.Entry.comparingByValue
 import java.util.concurrent.ConcurrentMap
 import java.util.regex.Pattern
@@ -72,17 +74,20 @@ class RoundService(
         return rollDices
     }
 
-    suspend fun rerollDices(message: Message): String {
+    suspend fun rerollDices(message: Message): Pair<IntArray, IntArray> {
+        var firstRoll = intArrayOf()
+        var reroll = intArrayOf()
         val groupId: Long = message.chat.id
         val playerId: Long = message.from!!.id
         if (checkRerollOrPassAvailable(groupId, playerId)) {
+            // TODO rework regex!!!
             val pattern = Pattern.compile(("^" + Command.REROLL.value) + "(\\s+[1-6]){1,5}$")
             val matcher = pattern.matcher(message.text!!)
             if (matcher.matches()) {
                 val pr = rounds[groupId]
                 val pir: PlayerInRound = pr!!.players[playerId]!!
-                val reroll = StringUtil.getRerollNumbers(message.text!!)
-                val firstRoll: IntArray = pir.dices
+                reroll = StringUtil.getRerollNumbers(message.text!!)
+                firstRoll = pir.dices
                 DiceUtil.reroll(firstRoll, reroll)
                 pir.dices = firstRoll
                 pir.isReroll = false
@@ -90,19 +95,10 @@ class RoundService(
                 pr.players[playerId] = pir
                 pr.actionCounter -= 1
 
-                messageService.sendMessage(
-                    groupId,
-                    java.lang.String.format(
-                        RandomPhrase.getRerollPhrase(),
-                        StringUtil.diamondWrapperForId(playerId),
-                        StringUtil.resultWithBrackets(reroll),
-                        StringUtil.resultWithBrackets(firstRoll)
-                    )
-                )
                 checkAvailableActions(groupId, pr)
             }
         }
-
+        return Pair(firstRoll, reroll)
     }
 
     private fun checkRerollOrPassAvailable(groupId: Long, playerId: Long): Boolean {
