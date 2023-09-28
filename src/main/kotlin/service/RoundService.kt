@@ -20,6 +20,10 @@ class RoundService(
     private val scoreService: ScoreService,
     private val rounds: ConcurrentMap<Long, PokerRound>
 ) {
+    fun getNameOrUsername(message: Message): String {
+        return message.from?.firstName.takeIf { it!!.isNotBlank() } ?: message.from?.username ?: ""
+    }
+
     fun startNewRound(groupId: Long, playerInitiator: Long): Boolean {
         val isSuccessfulStart: Boolean
         if (rounds.containsKey(groupId)) {
@@ -96,6 +100,20 @@ class RoundService(
             }
         }
         return Pair(firstRoll, reroll)
+    }
+
+    fun pass(message: Message) {
+        val groupId: Long = message.chat.id
+        val playerId: Long = message.from!!.id
+
+        if (checkRerollOrPassAvailable(groupId, playerId)) {
+            val pr = rounds[groupId]
+            val pir: PlayerInRound = pr!!.players[playerId]!!
+            pir.isReroll = false
+            pir.isPass = false
+            pr.players[playerId] = pir
+            pr.actionCounter -= 1
+        }
     }
 
     private fun checkRerollOrPassAvailable(groupId: Long, playerId: Long): Boolean {

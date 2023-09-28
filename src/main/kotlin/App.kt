@@ -36,8 +36,7 @@ object AppKt {
                 command(Command.START.value) {
                     val groupId = update.message!!.chat.id
                     val playerInitiator = update.message!!.from!!.id
-                    val playerName = update.message!!.from!!.firstName.isBlank()
-                        .let { update.message!!.from!!.username!! }
+                    val playerName = roundService.getNameOrUsername(message)
                     val isSuccessfulStart = roundService.startNewRound(groupId, playerInitiator)
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),
@@ -48,8 +47,7 @@ object AppKt {
                     )
                 }
                 command(Command.ROLL.value) {
-                    val playerName =
-                        message.from!!.firstName.isBlank().let { message.from!!.username!! }
+                    val playerName = roundService.getNameOrUsername(message)
                     val rollDices = roundService.rollDices(update.message!!, playerName)
                     bot.sendMessage(
                         chatId = ChatId.fromId(update.message!!.chat.id),
@@ -57,8 +55,7 @@ object AppKt {
                     )
                 }
                 command(Command.REROLL.value) {
-                    val playerName =
-                        message.from!!.firstName.isBlank().let { message.from!!.username!! }
+                    val playerName = roundService.getNameOrUsername(message)
                     val groupId = update.message!!.chat.id
                     val rolls = roundService.rerollDices(message)
                     bot.sendMessage(
@@ -81,10 +78,22 @@ object AppKt {
                     }
                 }
                 command(Command.PASS.value) {
+                    val groupId = update.message!!.chat.id
+                    val playerName = roundService.getNameOrUsername(message)
                     bot.sendMessage(
                         chatId = ChatId.fromId(update.message!!.chat.id),
-                        text = "Pass!"
+                        text = messageService.prepareTextAfterPass(playerName)
                     )
+                    if (roundService.checkAvailableActions(groupId)) {
+                        val result = roundService.saveResultsAndDeleteRound(groupId)
+                        bot.sendMessage(
+                            chatId = ChatId.fromId(groupId),
+                            text = messageService.prepareResultText(
+                                result,
+                                rounds[groupId]!!.players
+                            )
+                        )
+                    }
                 }
                 command(Command.FINISH.value) {
                     bot.sendMessage(

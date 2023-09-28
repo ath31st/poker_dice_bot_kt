@@ -36,14 +36,17 @@ class MessageService {
         val text = if (firstRoll.isEmpty() || reroll.isEmpty()) {
             ""
         } else {
-            String.format(
-                RandomPhrase.getRerollPhrase(),
+            RandomPhrase.getRerollPhrase().format(
                 playerName,
                 StringUtil.resultWithBrackets(reroll),
                 StringUtil.resultWithBrackets(firstRoll)
             )
         }
         return text
+    }
+
+    fun prepareTextAfterPass(playerName: String): String {
+        return RandomPhrase.getPassPhrase().format(playerName)
     }
 
     fun prepareResultText(
