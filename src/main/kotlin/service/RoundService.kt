@@ -102,10 +102,10 @@ class RoundService(
         return Pair(firstRoll, reroll)
     }
 
-    fun pass(message: Message) {
+    fun pass(message: Message): Boolean {
         val groupId: Long = message.chat.id
         val playerId: Long = message.from!!.id
-
+        val resultPassing: Boolean
         if (checkRerollOrPassAvailable(groupId, playerId)) {
             val pr = rounds[groupId]
             val pir: PlayerInRound = pr!!.players[playerId]!!
@@ -113,7 +113,28 @@ class RoundService(
             pir.isPass = false
             pr.players[playerId] = pir
             pr.actionCounter -= 1
+            resultPassing = true
+        } else {
+            resultPassing = false
         }
+        return resultPassing
+    }
+
+    fun finishRound(message: Message): Boolean {
+        val groupId: Long = message.chat.id
+        val playerId: Long = message.from!!.id
+        val resultFinishing: Boolean
+        if (rounds.containsKey(groupId) && ((rounds[groupId]?.playerInitiator ?: 0) == playerId)) {
+            val pr = rounds[groupId]
+            if (pr != null) {
+                pr.isEnded = true
+            }
+            rounds.remove(groupId)
+            resultFinishing = true
+        } else {
+            resultFinishing = false
+        }
+        return resultFinishing
     }
 
     private fun checkRerollOrPassAvailable(groupId: Long, playerId: Long): Boolean {
@@ -136,7 +157,7 @@ class RoundService(
 
     fun checkAvailableActions(groupId: Long): Boolean {
         val pr = rounds[groupId]
-        return pr!!.actionCounter == 0
+        return pr?.actionCounter == 0 && pr.players.size > 1
     }
 
     suspend fun saveResultsAndDeleteRound(groupId: Long): Map<Long, RoundResult> {

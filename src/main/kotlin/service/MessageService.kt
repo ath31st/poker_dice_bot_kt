@@ -49,6 +49,10 @@ class MessageService {
         return RandomPhrase.getPassPhrase().format(playerName)
     }
 
+    fun prepareTextAfterFinishRound(playerName: String): String {
+        return MessageEnum.FINISH_ROUND.value.format(playerName)
+    }
+
     fun prepareResultText(
         result: Map<Long, RoundResult>,
         players: Map<Long, PlayerInRound>

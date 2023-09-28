@@ -80,10 +80,12 @@ object AppKt {
                 command(Command.PASS.value) {
                     val groupId = update.message!!.chat.id
                     val playerName = roundService.getNameOrUsername(message)
-                    bot.sendMessage(
-                        chatId = ChatId.fromId(update.message!!.chat.id),
-                        text = messageService.prepareTextAfterPass(playerName)
-                    )
+                    if (roundService.pass(message)) {
+                        bot.sendMessage(
+                            chatId = ChatId.fromId(update.message!!.chat.id),
+                            text = messageService.prepareTextAfterPass(playerName)
+                        )
+                    }
                     if (roundService.checkAvailableActions(groupId)) {
                         val result = roundService.saveResultsAndDeleteRound(groupId)
                         bot.sendMessage(
@@ -96,10 +98,13 @@ object AppKt {
                     }
                 }
                 command(Command.FINISH.value) {
-                    bot.sendMessage(
-                        chatId = ChatId.fromId(update.message!!.chat.id),
-                        text = "Finish!"
-                    )
+                    if (roundService.finishRound(message)) {
+                        val playerName = roundService.getNameOrUsername(message)
+                        bot.sendMessage(
+                            chatId = ChatId.fromId(update.message!!.chat.id),
+                            text = messageService.prepareTextAfterFinishRound(playerName)
+                        )
+                    }
                 }
                 command(Command.HELP.value) {
                     bot.sendMessage(
