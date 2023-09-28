@@ -49,8 +49,8 @@ class MessageService {
     fun prepareResultText(
         result: Map<Long, RoundResult>,
         players: Map<Long, PlayerInRound>
-    ) {
-        """
+    ): String {
+        return """
      =====================
      Результаты раунда:
      ```

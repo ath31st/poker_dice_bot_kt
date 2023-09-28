@@ -59,15 +59,26 @@ object AppKt {
                 command(Command.REROLL.value) {
                     val playerName =
                         message.from!!.firstName.isBlank().let { message.from!!.username!! }
+                    val groupId = update.message!!.chat.id
                     val rolls = roundService.rerollDices(message)
                     bot.sendMessage(
-                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        chatId = ChatId.fromId(groupId),
                         text = messageService.prepareTextAfterRerollDices(
                             rolls.first,
                             rolls.second,
                             playerName
                         )
                     )
+                    if (roundService.checkAvailableActions(groupId)) {
+                        val result = roundService.saveResultsAndDeleteRound(groupId)
+                        bot.sendMessage(
+                            chatId = ChatId.fromId(groupId),
+                            text = messageService.prepareResultText(
+                                result,
+                                rounds[groupId]!!.players
+                            )
+                        )
+                    }
                 }
                 command(Command.PASS.value) {
                     bot.sendMessage(

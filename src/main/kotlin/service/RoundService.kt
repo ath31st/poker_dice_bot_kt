@@ -74,7 +74,7 @@ class RoundService(
         return rollDices
     }
 
-    suspend fun rerollDices(message: Message): Pair<IntArray, IntArray> {
+    fun rerollDices(message: Message): Pair<IntArray, IntArray> {
         var firstRoll = intArrayOf()
         var reroll = intArrayOf()
         val groupId: Long = message.chat.id
@@ -93,8 +93,6 @@ class RoundService(
                 pir.isPass = false
                 pr.players[playerId] = pir
                 pr.actionCounter -= 1
-
-                checkAvailableActions(groupId, pr)
             }
         }
         return Pair(firstRoll, reroll)
@@ -118,23 +116,27 @@ class RoundService(
         return result
     }
 
-    private suspend fun checkAvailableActions(groupId: Long, pr: PokerRound) {
-        if (pr.actionCounter > 0) return
-        saveResultsAndDeleteRound(groupId, pr)
+    fun checkAvailableActions(groupId: Long): Boolean {
+        val pr = rounds[groupId]
+        return pr!!.actionCounter == 0
     }
 
-    private suspend fun saveResultsAndDeleteRound(groupId: Long, pr: PokerRound) {
-        val result: Map<Long, RoundResult> = scoreService.processingRoundResult(pr)
-        //messageService.sendResult(channel, result, pr.getPlayers())
-        if (pr.players.size > 1) {
-            val winner = result.entries
-                .stream()
-                .sorted(comparingByValue(DiceUtil::customComparator))
-                .findFirst()
-                .orElseThrow()
-                .key
-            resultService.addNewResult(groupId, winner)
+    suspend fun saveResultsAndDeleteRound(groupId: Long): Map<Long, RoundResult> {
+        val pr = rounds[groupId]
+        var result: Map<Long, RoundResult> = mapOf()
+        if (pr != null) {
+            result = scoreService.processingRoundResult(pr)
+            if (pr.players.size > 1) {
+                val winner = result.entries
+                    .stream()
+                    .sorted(comparingByValue(DiceUtil::customComparator))
+                    .findFirst()
+                    .orElseThrow()
+                    .key
+                resultService.addNewResult(groupId, winner)
+            }
+            rounds.remove(pr.groupId)
         }
-        rounds.remove(pr.groupId)
+        return result
     }
 }
