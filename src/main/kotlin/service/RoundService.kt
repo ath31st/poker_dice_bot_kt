@@ -6,15 +6,16 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.botfarm.entity.PlayerInRound
 import org.example.botfarm.entity.PokerRound
-import org.example.botfarm.util.DiceUtil
-import org.example.botfarm.util.MessageEnum
-import org.example.botfarm.util.RandomPhrase
-import org.example.botfarm.util.StringUtil
+import org.example.botfarm.entity.RoundResult
+import org.example.botfarm.util.*
+import java.util.Map.Entry.comparingByValue
 import java.util.concurrent.ConcurrentMap
+import java.util.regex.Pattern
 
 class RoundService(
     private val playerService: PlayerService,
     private val resultService: ResultService,
+    private val scoreService: ScoreService,
     private val rounds: ConcurrentMap<Long, PokerRound>
 ) {
     fun startNewRound(groupId: Long, playerInitiator: Long, playerName: String): String {
@@ -74,6 +75,48 @@ class RoundService(
         return result
     }
 
+    suspend fun rerollDices(message: Message): String {
+        var result = ""
+        val groupId: Long = message.chat.id
+        val playerId: Long = message.from!!.id
+        if (checkRerollOrPassAvailable(groupId, playerId)) {
+            val pattern = Pattern.compile(("^" + Command.REROLL.value) + "(\\s+[1-6]){1,5}$")
+            val matcher = pattern.matcher(message.text!!)
+            if (matcher.matches()) {
+                val pr = rounds[groupId]
+                val pir: PlayerInRound = pr!!.players[playerId]!!
+                val reroll = StringUtil.getRerollNumbers(message.text!!)
+                val firstRoll: IntArray = pir.dices
+                DiceUtil.reroll(firstRoll, reroll)
+                pir.dices = firstRoll
+                pir.isReroll = false
+                pir.isPass = false
+                pr.players[playerId] = pir
+                pr.actionCounter -= 1
+
+                messageService.sendMessage(
+                    groupId,
+                    java.lang.String.format(
+                        RandomPhrase.getRerollPhrase(),
+                        StringUtil.diamondWrapperForId(playerId),
+                        StringUtil.resultWithBrackets(reroll),
+                        StringUtil.resultWithBrackets(firstRoll)
+                    )
+                )
+                checkAvailableActions(groupId, pr)
+            }
+        }
+
+    }
+
+    private fun checkRerollOrPassAvailable(groupId: Long, playerId: Long): Boolean {
+        if (!rounds.containsKey(groupId)) return false
+        val pr = rounds[groupId]
+        return pr != null && pr.players.containsKey(playerId)
+                && !pr.isEnded && !pr.players[playerId]?.isRoll!!
+                && pr.players[playerId]?.isReroll!! && pr.players[playerId]?.isPass!!
+    }
+
     private fun checkRoundAvailable(groupId: Long, playerId: Long): Boolean {
         val result: Boolean = if (!rounds.containsKey(groupId)) {
             false
@@ -82,5 +125,25 @@ class RoundService(
             !pr!!.isEnded && !pr.players.containsKey(playerId)
         }
         return result
+    }
+
+    private suspend fun checkAvailableActions(groupId: Long, pr: PokerRound) {
+        if (pr.actionCounter > 0) return
+        saveResultsAndDeleteRound(groupId, pr)
+    }
+
+    private suspend fun saveResultsAndDeleteRound(groupId: Long, pr: PokerRound) {
+        val result: Map<Long, RoundResult> = scoreService.processingRoundResult(pr)
+        //messageService.sendResult(channel, result, pr.getPlayers())
+        if (pr.players.size > 1) {
+            val winner = result.entries
+                .stream()
+                .sorted(comparingByValue(DiceUtil::customComparator))
+                .findFirst()
+                .orElseThrow()
+                .key
+            resultService.addNewResult(groupId, winner)
+        }
+        rounds.remove(pr.groupId)
     }
 }

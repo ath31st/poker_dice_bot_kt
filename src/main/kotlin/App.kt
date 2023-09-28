@@ -11,6 +11,7 @@ import org.example.botfarm.entity.PokerRound
 import org.example.botfarm.service.PlayerService
 import org.example.botfarm.service.ResultService
 import org.example.botfarm.service.RoundService
+import org.example.botfarm.service.ScoreService
 import org.example.botfarm.util.Command
 import org.example.botfarm.util.MessageEnum
 import org.slf4j.LoggerFactory
@@ -25,7 +26,7 @@ object AppKt {
     @JvmStatic
     fun main(args: Array<String>) {
         DatabaseFactory.init()
-        val roundService = RoundService(PlayerService(), ResultService(), rounds)
+        val roundService = RoundService(PlayerService(), ResultService(), ScoreService(), rounds)
 
         logger.info("application starting...")
         val botToken = args[0]
