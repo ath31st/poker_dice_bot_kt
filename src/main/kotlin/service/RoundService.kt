@@ -26,10 +26,12 @@ class RoundService(
         return message.from?.firstName.takeIf { it!!.isNotBlank() } ?: message.from?.username ?: ""
     }
 
-    fun startNewRound(groupId: Long, playerInitiator: Long): Boolean {
-        val isSuccessfulStart: Boolean
+    fun startNewRound(groupId: Long, playerInitiator: Long): Int {
+        val status: Int
         if (rounds.containsKey(groupId)) {
-            isSuccessfulStart = false
+            status = 0
+        } else if (groupId == 0L || playerInitiator == 0L) {
+            status = -1
         } else {
             val players = HashMap<Long, PlayerInRound>()
 
@@ -44,9 +46,9 @@ class RoundService(
                 localDateTime,
                 actionCounter = 0
             )
-            isSuccessfulStart = true
+            status = 1
         }
-        return isSuccessfulStart
+        return status
     }
 
     suspend fun rollDices(message: Message, playerName: String): IntArray {

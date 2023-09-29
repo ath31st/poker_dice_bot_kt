@@ -10,16 +10,24 @@ import java.util.Map.Entry.comparingByValue
 import java.util.stream.Collectors
 
 class MessageService {
-    fun prepareTextAfterStartingRound(isSuccessStart: Boolean, playerName: String): String {
-        return if (isSuccessStart) {
-            MessageEnum.START_ROUND.value.format(playerName)
-        } else {
-            MessageEnum.TABLE_BUSY.value
+    fun prepareTextAfterStartingRound(startRoundStatus: Int, playerName: String): String {
+        return when (startRoundStatus) {
+            1 -> {
+                MessageEnum.START_ROUND.value.format(playerName)
+            }
+
+            -1 -> {
+                MessageEnum.ISSUE_WITH_GROUP_ID_OR_PLAYER_ID.value
+            }
+
+            else -> {
+                MessageEnum.TABLE_BUSY.value
+            }
         }
     }
 
-    fun prepareTextAfterRollDices(rollDices: IntArray, playerName: String): String {
-        val text = if (rollDices.isEmpty()) {
+    fun prepareTextAfterRollDices(rollDices: IntArray?, playerName: String): String {
+        val text = if (rollDices == null || rollDices.isEmpty()) {
             ""
         } else {
             RandomPhrase.getRollDicesPhrase()

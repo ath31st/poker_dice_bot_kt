@@ -40,29 +40,30 @@ object AppKt {
             token = botToken
             dispatch {
                 command(Command.START.value) {
-                    val groupId = update.message!!.chat.id
-                    val playerInitiator = update.message!!.from!!.id
+                    val groupId = update.message?.chat?.id ?: 0
+                    val playerInitiator = update.message?.from?.id ?: 0
                     val playerName = roundService.getNameOrUsername(message)
-                    val isSuccessfulStart = roundService.startNewRound(groupId, playerInitiator)
+                    val startRoundStatus = roundService.startNewRound(groupId, playerInitiator)
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),
                         text = messageService.prepareTextAfterStartingRound(
-                            isSuccessfulStart,
+                            startRoundStatus,
                             playerName
                         )
                     )
                 }
                 command(Command.ROLL.value) {
+                    val groupId = update.message?.chat?.id ?: 0
                     val playerName = roundService.getNameOrUsername(message)
-                    val rollDices = roundService.rollDices(update.message!!, playerName)
+                    val rollDices = update.message?.let { roundService.rollDices(it, playerName) }
                     bot.sendMessage(
-                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        chatId = ChatId.fromId(groupId),
                         text = messageService.prepareTextAfterRollDices(rollDices, playerName)
                     )
                 }
                 command(Command.REROLL.value) {
+                    val groupId = update.message?.chat?.id ?: 0
                     val playerName = roundService.getNameOrUsername(message)
-                    val groupId = update.message!!.chat.id
                     val round = rounds[groupId]
                     val rolls = roundService.rerollDices(message)
                     bot.sendMessage(
@@ -86,11 +87,11 @@ object AppKt {
                     }
                 }
                 command(Command.PASS.value) {
-                    val groupId = update.message!!.chat.id
+                    val groupId = update.message?.chat?.id ?: 0
                     val playerName = roundService.getNameOrUsername(message)
                     if (roundService.pass(message)) {
                         bot.sendMessage(
-                            chatId = ChatId.fromId(update.message!!.chat.id),
+                            chatId = ChatId.fromId(groupId),
                             text = messageService.prepareTextAfterPass(playerName)
                         )
                     }
@@ -109,29 +110,32 @@ object AppKt {
                 }
                 command(Command.FINISH.value) {
                     if (roundService.finishRound(message)) {
+                        val groupId = update.message?.chat?.id ?: 0
                         val playerName = roundService.getNameOrUsername(message)
                         bot.sendMessage(
-                            chatId = ChatId.fromId(update.message!!.chat.id),
+                            chatId = ChatId.fromId(groupId),
                             text = messageService.prepareTextAfterFinishRound(playerName)
                         )
                     }
                 }
                 command(Command.HELP.value) {
+                    val groupId = update.message?.chat?.id ?: 0
                     bot.sendMessage(
-                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        chatId = ChatId.fromId(groupId),
                         parseMode = ParseMode.MARKDOWN,
                         text = MessageEnum.HELP.value
                     )
                 }
                 command(Command.COMBINATION.value) {
+                    val groupId = update.message?.chat?.id ?: 0
                     bot.sendMessage(
-                        chatId = ChatId.fromId(update.message!!.chat.id),
+                        chatId = ChatId.fromId(groupId),
                         parseMode = ParseMode.MARKDOWN,
                         text = MessageEnum.COMBINATION.value
                     )
                 }
                 command(Command.STATISTICS.value) {
-                    val groupId = update.message!!.chat.id
+                    val groupId = update.message?.chat?.id ?: 0
                     val leaders = roundService.getLeaderBoardByGroup(groupId)
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),

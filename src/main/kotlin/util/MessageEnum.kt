@@ -2,6 +2,7 @@ package org.example.botfarm.util
 
 enum class MessageEnum(val value: String) {
     TABLE_BUSY("Извините, игровой стол сейчас занят"),
+    ISSUE_WITH_GROUP_ID_OR_PLAYER_ID("Возникла проблема с определением id группы или игрока"),
     START_ROUND("%s начинает новый раунд покера с костями!"),
     FINISH_ROUND("%s досрочно завершает раунд, результаты будут аннулированы"),
     TIME_EXPIRED("Время раунда подошло к концу"),

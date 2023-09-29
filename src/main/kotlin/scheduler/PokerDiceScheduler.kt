@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentMap
 
 object PokerDiceScheduler {
-    private const val DURATION = 1L
+    private const val DURATION = 5L
 
     fun finalizeRounds(
         rounds: ConcurrentMap<Long, PokerRound>
