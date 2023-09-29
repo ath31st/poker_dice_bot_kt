@@ -83,18 +83,21 @@ object AppKt {
                             val result = roundService.saveResultsAndDeleteRound(groupId)
                             bot.sendMessage(
                                 chatId = ChatId.fromId(groupId),
+                                disableNotification = true,
                                 parseMode = ParseMode.MARKDOWN,
                                 text = MessageEnum.TIME_EXPIRED.value,
                             )
                             it.second.forEach { playerName ->
                                 bot.sendMessage(
                                     chatId = ChatId.fromId(groupId),
+                                    disableNotification = true,
                                     parseMode = ParseMode.MARKDOWN,
                                     text = messageService.prepareAutoPassText(playerName),
                                 )
                             }
                             bot.sendMessage(
                                 chatId = ChatId.fromId(groupId),
+                                disableNotification = true,
                                 parseMode = ParseMode.MARKDOWN,
                                 text = messageService.prepareResultText(
                                     result,
@@ -113,6 +116,7 @@ object AppKt {
             val groupId = update.message?.chat?.id ?: 0
             bot.sendMessage(
                 chatId = ChatId.fromId(groupId),
+                disableNotification = true,
                 parseMode = ParseMode.MARKDOWN,
                 text = MessageEnum.HELP.value,
             )
@@ -126,6 +130,7 @@ object AppKt {
                 val playerName = roundService.getNameOrUsername(message)
                 bot.sendMessage(
                     chatId = ChatId.fromId(groupId),
+                    disableNotification = true,
                     text = messageService.prepareTextAfterFinishRound(playerName),
                 )
             }
@@ -139,6 +144,7 @@ object AppKt {
             if (roundService.pass(message)) {
                 bot.sendMessage(
                     chatId = ChatId.fromId(groupId),
+                    disableNotification = true,
                     text = messageService.prepareTextAfterPass(playerName),
                 )
             }
@@ -147,6 +153,7 @@ object AppKt {
                 val result = roundService.saveResultsAndDeleteRound(groupId)
                 bot.sendMessage(
                     chatId = ChatId.fromId(groupId),
+                    disableNotification = true,
                     parseMode = ParseMode.MARKDOWN,
                     text = messageService.prepareResultText(
                         result,
@@ -164,6 +171,7 @@ object AppKt {
             val rolls = roundService.rerollDices(message)
             bot.sendMessage(
                 chatId = ChatId.fromId(groupId),
+                disableNotification = true,
                 text = messageService.prepareTextAfterRerollDices(
                     rolls.first,
                     rolls.second,
@@ -175,6 +183,7 @@ object AppKt {
                 val result = roundService.saveResultsAndDeleteRound(groupId)
                 bot.sendMessage(
                     chatId = ChatId.fromId(groupId),
+                    disableNotification = true,
                     parseMode = ParseMode.MARKDOWN,
                     text = messageService.prepareResultText(
                         result,
@@ -192,6 +201,7 @@ object AppKt {
             val rollDices = update.message?.let { roundService.rollDices(it, playerName) }
             bot.sendMessage(
                 chatId = ChatId.fromId(groupId),
+                disableNotification = true,
                 text = messageService.prepareTextAfterRollDices(rollDices, playerName),
             )
         }
@@ -218,6 +228,7 @@ object AppKt {
             val groupId = update.message?.chat?.id ?: 0
             bot.sendMessage(
                 chatId = ChatId.fromId(groupId),
+                disableNotification = true,
                 parseMode = ParseMode.MARKDOWN,
                 text = MessageEnum.COMBINATION.value,
             )
@@ -230,6 +241,7 @@ object AppKt {
             val leaders = roundService.getLeaderBoardByGroup(groupId)
             bot.sendMessage(
                 chatId = ChatId.fromId(groupId),
+                disableNotification = true,
                 parseMode = ParseMode.MARKDOWN,
                 text = messageService.prepareLeaderBoardText(leaders.first, leaders.second),
             )
