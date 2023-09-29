@@ -1,9 +1,6 @@
 package org.example.botfarm.service
 
 import com.github.kotlintelegrambot.entities.Message
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.example.botfarm.entity.PlayerInRound
 import org.example.botfarm.entity.PokerRound
 import org.example.botfarm.entity.Result
@@ -35,15 +32,12 @@ class RoundService(
         } else {
             val players = HashMap<Long, PlayerInRound>()
 
-            val instant = Clock.System.now()
-            val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-
             rounds[groupId] = PokerRound(
                 playerInitiator,
                 isEnded = false,
                 groupId,
                 players,
-                localDateTime,
+                LocalDateTime.now(),
                 actionCounter = 0,
             )
             status = 1

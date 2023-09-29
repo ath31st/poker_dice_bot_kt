@@ -1,6 +1,5 @@
 package org.example.botfarm.scheduler
 
-import kotlinx.datetime.toJavaLocalDateTime
 import org.example.botfarm.entity.PokerRound
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentMap
@@ -19,7 +18,7 @@ object PokerDiceScheduler {
             val entry = iterator.next()
             val pokerRound = entry.value
 
-            if (pokerRound.startRound.toJavaLocalDateTime().plusMinutes(DURATION)
+            if (pokerRound.startRound.plusMinutes(DURATION)
                     .isBefore(currentTime)
             ) {
                 val groupId = entry.key

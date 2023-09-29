@@ -1,6 +1,7 @@
 package org.example.botfarm.entity
 
-import kotlinx.datetime.LocalDateTime
+import java.time.LocalDateTime
+
 
 data class PokerRound(
     val playerInitiator: Long,

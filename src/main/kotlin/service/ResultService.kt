@@ -1,8 +1,5 @@
 package org.example.botfarm.service
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.example.botfarm.DatabaseFactory.dbQuery
 import org.example.botfarm.dao.ResultDao
 import org.example.botfarm.entity.Player
@@ -39,13 +36,10 @@ class ResultService : ResultDao {
     }
 
     override suspend fun addNewResult(groupId: Long, winnerId: Long): Unit = dbQuery {
-        val instant = Clock.System.now()
-        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-
         Results.insert {
             it[Results.groupId] = groupId
             it[playerId] = winnerId
-            it[roundTime] = localDateTime
+            it[roundTime] = LocalDateTime.now()
         }
     }
 
@@ -57,11 +51,11 @@ class ResultService : ResultDao {
         Results
             .select {
                 (Results.groupId eq groupId) and (
-                    Results.roundTime.between(
-                        roundTimeStart,
-                        roundTimeEnd,
-                    )
-                    )
+                        Results.roundTime.between(
+                            roundTimeStart,
+                            roundTimeEnd,
+                        )
+                        )
             }
             .map(::resultRowToResult)
             .toList()
