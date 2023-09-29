@@ -143,8 +143,8 @@ object AppKt {
                 )
             }
             if (roundService.checkAvailableActions(groupId)) {
-                val result = roundService.saveResultsAndDeleteRound(groupId)
                 val round = rounds[groupId]
+                val result = roundService.saveResultsAndDeleteRound(groupId)
                 bot.sendMessage(
                     chatId = ChatId.fromId(groupId),
                     parseMode = ParseMode.MARKDOWN,
@@ -161,7 +161,6 @@ object AppKt {
         command(Command.REROLL.value) {
             val groupId = update.message?.chat?.id ?: 0
             val playerName = roundService.getNameOrUsername(message)
-            val round = rounds[groupId]
             val rolls = roundService.rerollDices(message)
             bot.sendMessage(
                 chatId = ChatId.fromId(groupId),
@@ -172,6 +171,7 @@ object AppKt {
                 ),
             )
             if (roundService.checkAvailableActions(groupId)) {
+                val round = rounds[groupId]
                 val result = roundService.saveResultsAndDeleteRound(groupId)
                 bot.sendMessage(
                     chatId = ChatId.fromId(groupId),
