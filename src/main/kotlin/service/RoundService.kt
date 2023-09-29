@@ -86,15 +86,15 @@ class RoundService(
         var firstRoll = intArrayOf()
         var reroll = intArrayOf()
         val groupId: Long = message.chat.id
-        val playerId: Long = message.from!!.id
+        val playerId: Long = message.from?.id ?: 0
         if (checkRerollOrPassAvailable(groupId, playerId)) {
             val pattern = Pattern.compile(("^/" + Command.REROLL.value) + "(\\s+[1-6]){1,5}$")
             val matcher = pattern.matcher(message.text!!)
             if (matcher.matches()) {
                 val pr = rounds[groupId]
-                val pir: PlayerInRound = pr!!.players[playerId]!!
+                val pir = pr?.players?.get(playerId)
                 reroll = StringUtil.getRerollNumbers(message.text!!)
-                firstRoll = pir.dices
+                firstRoll = pir?.dices!!
                 DiceUtil.reroll(firstRoll, reroll)
                 pir.dices = firstRoll
                 pir.isReroll = false
@@ -112,11 +112,13 @@ class RoundService(
         val resultPassing: Boolean
         if (checkRerollOrPassAvailable(groupId, playerId)) {
             val pr = rounds[groupId]
-            val pir: PlayerInRound = pr!!.players[playerId]!!
-            pir.isReroll = false
-            pir.isPass = false
-            pr.players[playerId] = pir
-            pr.actionCounter -= 1
+            val pir = pr?.players?.get(playerId)
+            if (pir != null) {
+                pir.isReroll = false
+                pir.isPass = false
+                pr.players[playerId] = pir
+                pr.actionCounter -= 1
+            }
             resultPassing = true
         } else {
             resultPassing = false
