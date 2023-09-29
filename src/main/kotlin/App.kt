@@ -4,28 +4,34 @@ import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.telegramError
+import com.github.kotlintelegrambot.dispatcher.text
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.logging.LogLevel
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.example.botfarm.entity.PokerRound
+import org.example.botfarm.scheduler.PokerDiceScheduler
 import org.example.botfarm.service.*
 import org.example.botfarm.util.Command
 import org.example.botfarm.util.MessageEnum
 import org.slf4j.LoggerFactory
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
+import java.util.concurrent.*
 
 object AppKt {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val rounds: ConcurrentMap<Long, PokerRound> = ConcurrentHashMap()
+    private val roundService =
+        RoundService(PlayerService(), ResultService(), ScoreService(), rounds)
+    private val messageService = MessageService()
+    private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
     // 1. bot token
+    @OptIn(DelicateCoroutinesApi::class)
     @JvmStatic
     fun main(args: Array<String>) {
         DatabaseFactory.init()
-        val roundService = RoundService(PlayerService(), ResultService(), ScoreService(), rounds)
-        val messageService = MessageService()
-
         logger.info("application starting...")
         val botToken = args[0]
 
@@ -126,8 +132,41 @@ object AppKt {
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),
                         parseMode = ParseMode.MARKDOWN,
-                        text = messageService.prepareLeaderBoardText(leaders.first,leaders.second)
+                        text = messageService.prepareLeaderBoardText(leaders.first, leaders.second)
                     )
+                }
+                text {
+                    scheduler.scheduleAtFixedRate({
+                        GlobalScope.launch {
+                            val autoCloseableRounds = PokerDiceScheduler.finalizeRounds(rounds)
+                            if (autoCloseableRounds.isNotEmpty()) {
+                                autoCloseableRounds.forEach {
+                                    val groupId = it.first
+                                    val result = roundService.saveResultsAndDeleteRound(groupId)
+                                    bot.sendMessage(
+                                        chatId = ChatId.fromId(groupId),
+                                        parseMode = ParseMode.MARKDOWN,
+                                        text = MessageEnum.TIME_EXPIRED.value
+                                    )
+                                    it.second.forEach { playerName ->
+                                        bot.sendMessage(
+                                            chatId = ChatId.fromId(groupId),
+                                            parseMode = ParseMode.MARKDOWN,
+                                            text = messageService.prepareAutoPassText(playerName)
+                                        )
+                                    }
+                                    bot.sendMessage(
+                                        chatId = ChatId.fromId(groupId),
+                                        text = messageService.prepareResultText(
+                                            result,
+                                            rounds[groupId]!!.players
+                                        )
+                                    )
+
+                                }
+                            }
+                        }
+                    }, 10, 15, TimeUnit.SECONDS)
                 }
                 telegramError {
                     println(error.getErrorMessage())

@@ -75,4 +75,8 @@ class MessageService {
                     .map { (key, value): Map.Entry<String, Int> -> "$key: {$value}" }
                     .collect(Collectors.joining("\n")) + "```"
     }
+
+    fun prepareAutoPassText(playerName: String): String {
+        return RandomPhrase.getAutoPassPhrase().format(playerName)
+    }
 }
