@@ -2,9 +2,18 @@ package org.example.botfarm.service
 
 import org.example.botfarm.DatabaseFactory.dbQuery
 import org.example.botfarm.dao.PlayerDao
-import org.example.botfarm.entity.*
-import org.jetbrains.exposed.sql.*
+import org.example.botfarm.entity.Player
+import org.example.botfarm.entity.PlayerInRound
+import org.example.botfarm.entity.Players
+import org.example.botfarm.entity.Result
+import org.example.botfarm.entity.Results
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.andIfNotNull
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.update
 
 class PlayerService : PlayerDao {
 

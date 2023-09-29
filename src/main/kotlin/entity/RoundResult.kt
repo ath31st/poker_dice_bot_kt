@@ -7,4 +7,3 @@ class RoundResult(
     val combination: Combination,
     val priority: Int,
 )
-
