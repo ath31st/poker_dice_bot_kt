@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.0'
     id 'application'
+    //id 'com.github.johnrengelman.shadow' version '8.1.0'
 }
 
 group = 'bot.farm'
@@ -34,5 +35,15 @@ kotlin {
 }
 
 application {
-    mainClassName = 'AppKt'
+    mainClassName = 'org.example.botfarm.AppKt'
+}
+
+task customFatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'org.example.botfarm.AppKt'
+    }
+    archiveFileName = 'poker_dice_bot_kt.jar'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
