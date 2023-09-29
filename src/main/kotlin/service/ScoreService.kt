@@ -31,7 +31,7 @@ class ScoreService {
                 RoundResult(
                     dices[0] * 5,
                     Combination.POKER,
-                    Combination.POKER.priority
+                    Combination.POKER.priority,
                 )
             }
 
@@ -39,7 +39,7 @@ class ScoreService {
                 RoundResult(
                     dices[2] * 4,
                     Combination.SQUARE,
-                    Combination.SQUARE.priority
+                    Combination.SQUARE.priority,
                 )
             }
 
@@ -47,7 +47,7 @@ class ScoreService {
                 RoundResult(
                     Arrays.stream(dices).sum(),
                     Combination.FULL_HOUSE,
-                    Combination.FULL_HOUSE.priority
+                    Combination.FULL_HOUSE.priority,
                 )
             }
 
@@ -55,7 +55,7 @@ class ScoreService {
                 RoundResult(
                     Arrays.stream(dices).sum(),
                     Combination.LARGE_STRAIGHT,
-                    Combination.LARGE_STRAIGHT.priority
+                    Combination.LARGE_STRAIGHT.priority,
                 )
             }
 
@@ -63,7 +63,7 @@ class ScoreService {
                 RoundResult(
                     Arrays.stream(dices).sum(),
                     Combination.SMALL_STRAIGHT,
-                    Combination.SMALL_STRAIGHT.priority
+                    Combination.SMALL_STRAIGHT.priority,
                 )
             }
 
@@ -71,7 +71,7 @@ class ScoreService {
                 RoundResult(
                     sequenceScore(dices, 3),
                     Combination.SET,
-                    Combination.SET.priority
+                    Combination.SET.priority,
                 )
             }
 
@@ -79,7 +79,7 @@ class ScoreService {
                 RoundResult(
                     scoreTwoPair(dices),
                     Combination.TWO_PAIR,
-                    Combination.TWO_PAIR.priority
+                    Combination.TWO_PAIR.priority,
                 )
             }
 
@@ -87,7 +87,7 @@ class ScoreService {
                 RoundResult(
                     sequenceScore(dices, 2),
                     Combination.PAIR,
-                    Combination.PAIR.priority
+                    Combination.PAIR.priority,
                 )
             }
 
@@ -95,7 +95,7 @@ class ScoreService {
                 RoundResult(
                     score = 0,
                     Combination.NOTHING,
-                    Combination.NOTHING.priority
+                    Combination.NOTHING.priority,
                 )
             }
         }

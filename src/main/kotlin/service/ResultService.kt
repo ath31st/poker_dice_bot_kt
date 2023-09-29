@@ -34,7 +34,7 @@ class ResultService : ResultDao {
             resultId = row[Results.resultId],
             player = winner,
             roundTime = row[Results.roundTime],
-            groupId = row[Results.groupId]
+            groupId = row[Results.groupId],
         )
     }
 
@@ -52,14 +52,16 @@ class ResultService : ResultDao {
     override suspend fun findByGroupIdAndRoundTimeBetween(
         groupId: Long,
         roundTimeStart: LocalDateTime,
-        roundTimeEnd: LocalDateTime
+        roundTimeEnd: LocalDateTime,
     ): List<Result> = dbQuery {
         Results
             .select {
-                (Results.groupId eq groupId) and (Results.roundTime.between(
-                    roundTimeStart,
-                    roundTimeEnd
-                ))
+                (Results.groupId eq groupId) and (
+                    Results.roundTime.between(
+                        roundTimeStart,
+                        roundTimeEnd,
+                    )
+                    )
             }
             .map(::resultRowToResult)
             .toList()

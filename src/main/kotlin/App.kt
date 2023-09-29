@@ -48,8 +48,8 @@ object AppKt {
                         chatId = ChatId.fromId(groupId),
                         text = messageService.prepareTextAfterStartingRound(
                             startRoundStatus,
-                            playerName
-                        )
+                            playerName,
+                        ),
                     )
                 }
                 command(Command.ROLL.value) {
@@ -58,7 +58,7 @@ object AppKt {
                     val rollDices = update.message?.let { roundService.rollDices(it, playerName) }
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),
-                        text = messageService.prepareTextAfterRollDices(rollDices, playerName)
+                        text = messageService.prepareTextAfterRollDices(rollDices, playerName),
                     )
                 }
                 command(Command.REROLL.value) {
@@ -71,8 +71,8 @@ object AppKt {
                         text = messageService.prepareTextAfterRerollDices(
                             rolls.first,
                             rolls.second,
-                            playerName
-                        )
+                            playerName,
+                        ),
                     )
                     if (roundService.checkAvailableActions(groupId)) {
                         val result = roundService.saveResultsAndDeleteRound(groupId)
@@ -81,8 +81,8 @@ object AppKt {
                             parseMode = ParseMode.MARKDOWN,
                             text = messageService.prepareResultText(
                                 result,
-                                round!!.players
-                            )
+                                round!!.players,
+                            ),
                         )
                     }
                 }
@@ -92,7 +92,7 @@ object AppKt {
                     if (roundService.pass(message)) {
                         bot.sendMessage(
                             chatId = ChatId.fromId(groupId),
-                            text = messageService.prepareTextAfterPass(playerName)
+                            text = messageService.prepareTextAfterPass(playerName),
                         )
                     }
                     if (roundService.checkAvailableActions(groupId)) {
@@ -103,8 +103,8 @@ object AppKt {
                             parseMode = ParseMode.MARKDOWN,
                             text = messageService.prepareResultText(
                                 result,
-                                round!!.players
-                            )
+                                round!!.players,
+                            ),
                         )
                     }
                 }
@@ -114,7 +114,7 @@ object AppKt {
                         val playerName = roundService.getNameOrUsername(message)
                         bot.sendMessage(
                             chatId = ChatId.fromId(groupId),
-                            text = messageService.prepareTextAfterFinishRound(playerName)
+                            text = messageService.prepareTextAfterFinishRound(playerName),
                         )
                     }
                 }
@@ -123,7 +123,7 @@ object AppKt {
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),
                         parseMode = ParseMode.MARKDOWN,
-                        text = MessageEnum.HELP.value
+                        text = MessageEnum.HELP.value,
                     )
                 }
                 command(Command.COMBINATION.value) {
@@ -131,7 +131,7 @@ object AppKt {
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),
                         parseMode = ParseMode.MARKDOWN,
-                        text = MessageEnum.COMBINATION.value
+                        text = MessageEnum.COMBINATION.value,
                     )
                 }
                 command(Command.STATISTICS.value) {
@@ -140,7 +140,7 @@ object AppKt {
                     bot.sendMessage(
                         chatId = ChatId.fromId(groupId),
                         parseMode = ParseMode.MARKDOWN,
-                        text = messageService.prepareLeaderBoardText(leaders.first, leaders.second)
+                        text = messageService.prepareLeaderBoardText(leaders.first, leaders.second),
                     )
                 }
                 text {
@@ -155,13 +155,13 @@ object AppKt {
                                     bot.sendMessage(
                                         chatId = ChatId.fromId(groupId),
                                         parseMode = ParseMode.MARKDOWN,
-                                        text = MessageEnum.TIME_EXPIRED.value
+                                        text = MessageEnum.TIME_EXPIRED.value,
                                     )
                                     it.second.forEach { playerName ->
                                         bot.sendMessage(
                                             chatId = ChatId.fromId(groupId),
                                             parseMode = ParseMode.MARKDOWN,
-                                            text = messageService.prepareAutoPassText(playerName)
+                                            text = messageService.prepareAutoPassText(playerName),
                                         )
                                     }
                                     bot.sendMessage(
@@ -169,10 +169,9 @@ object AppKt {
                                         parseMode = ParseMode.MARKDOWN,
                                         text = messageService.prepareResultText(
                                             result,
-                                            round!!.players
-                                        )
+                                            round!!.players,
+                                        ),
                                     )
-
                                 }
                             }
                         }

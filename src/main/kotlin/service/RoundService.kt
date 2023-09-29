@@ -20,7 +20,7 @@ class RoundService(
     private val playerService: PlayerService,
     private val resultService: ResultService,
     private val scoreService: ScoreService,
-    private val rounds: ConcurrentMap<Long, PokerRound>
+    private val rounds: ConcurrentMap<Long, PokerRound>,
 ) {
     fun getNameOrUsername(message: Message): String {
         return message.from?.firstName.takeIf { it!!.isNotBlank() } ?: message.from?.username ?: ""
@@ -44,7 +44,7 @@ class RoundService(
                 groupId,
                 players,
                 localDateTime,
-                actionCounter = 0
+                actionCounter = 0,
             )
             status = 1
         }
@@ -64,7 +64,7 @@ class RoundService(
                     playerId,
                     username = message.from!!.username ?: "",
                     firstName = message.from!!.firstName,
-                    lastName = message.from!!.lastName ?: ""
+                    lastName = message.from!!.lastName ?: "",
                 )
             } else {
                 playerService.checkAndUpdateFirstName(playerId, playerName)
@@ -146,9 +146,9 @@ class RoundService(
     private fun checkRerollOrPassAvailable(groupId: Long, playerId: Long): Boolean {
         if (!rounds.containsKey(groupId)) return false
         val pr = rounds[groupId]
-        return pr != null && pr.players.containsKey(playerId)
-                && !pr.isEnded && !pr.players[playerId]?.isRoll!!
-                && pr.players[playerId]?.isReroll!! && pr.players[playerId]?.isPass!!
+        return pr != null && pr.players.containsKey(playerId) &&
+            !pr.isEnded && !pr.players[playerId]?.isRoll!! &&
+            pr.players[playerId]?.isReroll!! && pr.players[playerId]?.isPass!!
     }
 
     private fun checkRoundAvailable(groupId: Long, playerId: Long): Boolean {
@@ -189,7 +189,7 @@ class RoundService(
         val results: List<Result> = resultService.findByGroupIdAndRoundTimeBetween(
             groupId,
             LocalDateTime.now().minusDays(7),
-            LocalDateTime.now()
+            LocalDateTime.now(),
         )
         val leaders: Map<String, Int> =
             results.groupingBy { it.player.firstName.ifBlank { it.player.username } }.eachCount()

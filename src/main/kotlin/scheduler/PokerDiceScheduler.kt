@@ -9,7 +9,7 @@ object PokerDiceScheduler {
     private const val DURATION = 5L
 
     fun finalizeRounds(
-        rounds: ConcurrentMap<Long, PokerRound>
+        rounds: ConcurrentMap<Long, PokerRound>,
     ): List<Pair<Long, List<String>>> {
         val result: MutableList<Pair<Long, List<String>>> = mutableListOf()
         val currentTime = LocalDateTime.now()

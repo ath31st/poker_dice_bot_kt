@@ -20,12 +20,11 @@ class PlayerService : PlayerDao {
                     resultId = it[Results.resultId],
                     player = player,
                     roundTime = it[Results.roundTime],
-                    groupId = it[Results.groupId]
+                    groupId = it[Results.groupId],
                 )
             }
         return player
     }
-
 
     override suspend fun player(playerId: Long): Player? = dbQuery {
         Players
@@ -51,7 +50,7 @@ class PlayerService : PlayerDao {
         playerId: Long,
         username: String,
         firstName: String,
-        lastName: String
+        lastName: String,
     ): Player? = dbQuery {
         val insertStatement = Players.insert {
             it[id] = playerId
@@ -80,12 +79,10 @@ class PlayerService : PlayerDao {
             Players.update({ Players.id eq playerId }) { it[Players.firstName] = firstName }
         }
 
-
     suspend fun checkAndUpdateFirstName(playerId: Long, firstName: String) {
         if (!existsByIdAndFirstName(playerId, firstName)) {
             updateFirstNameById(playerId, firstName)
         }
-
     }
 
     fun createPiR(): PlayerInRound {

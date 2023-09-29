@@ -12,7 +12,7 @@ interface PlayerDao {
         playerId: Long,
         username: String,
         firstName: String,
-        lastName: String
+        lastName: String,
     ): Player?
 
     suspend fun deletePlayer(playerId: Long): Boolean

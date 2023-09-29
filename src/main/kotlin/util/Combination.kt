@@ -9,5 +9,5 @@ enum class Combination(val value: String, val priority: Int) {
     SET("Сет", 4),
     TWO_PAIR("Две пары", 3),
     PAIR("Пара", 2),
-    NOTHING("Ничего", 1)
+    NOTHING("Ничего", 1),
 }
