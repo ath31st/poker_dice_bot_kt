@@ -121,9 +121,12 @@ object AppKt {
                     )
                 }
                 command(Command.STATISTICS.value) {
+                    val groupId = update.message!!.chat.id
+                    val leaders = roundService.getLeaderBoardByGroup(groupId)
                     bot.sendMessage(
-                        chatId = ChatId.fromId(update.message!!.chat.id),
-                        text = "Stat!"
+                        chatId = ChatId.fromId(groupId),
+                        parseMode = ParseMode.MARKDOWN,
+                        text = messageService.prepareLeaderBoardText(leaders.first,leaders.second)
                     )
                 }
                 telegramError {

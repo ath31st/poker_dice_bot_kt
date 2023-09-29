@@ -6,10 +6,12 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.botfarm.entity.PlayerInRound
 import org.example.botfarm.entity.PokerRound
+import org.example.botfarm.entity.Result
 import org.example.botfarm.entity.RoundResult
 import org.example.botfarm.util.Command
 import org.example.botfarm.util.DiceUtil
 import org.example.botfarm.util.StringUtil
+import java.time.LocalDateTime
 import java.util.Map.Entry.comparingByValue
 import java.util.concurrent.ConcurrentMap
 import java.util.regex.Pattern
@@ -177,5 +179,17 @@ class RoundService(
             rounds.remove(pr.groupId)
         }
         return result
+    }
+
+    suspend fun getLeaderBoardByGroup(groupId: Long): Pair<Int, Map<String, Int>> {
+        val results: List<Result> = resultService.findByGroupIdAndRoundTimeBetween(
+            groupId,
+            LocalDateTime.now().minusDays(7),
+            LocalDateTime.now()
+        )
+        val leaders: Map<String, Int> =
+            results.groupingBy { it.player.firstName.ifBlank { it.player.username } }.eachCount()
+
+        return Pair(results.size, leaders)
     }
 }

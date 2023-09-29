@@ -57,17 +57,22 @@ class MessageService {
         result: Map<Long, RoundResult>,
         players: Map<Long, PlayerInRound>
     ): String {
-        return """
-     =====================
-     Результаты раунда:
-     ```
-     """.trimIndent() +
+        return "=====================\nРезультаты раунда:\n```\n".trimIndent() +
                 result.entries
                     .stream()
                     .sorted(comparingByValue(DiceUtil::customComparator))
                     .map { (key, value): Map.Entry<Long, RoundResult> ->
                         "${players[key]?.name}: ${value.combination.value} {${value.score}}"
-                    }
+                    }.collect(Collectors.joining("\n")) + "```"
+    }
+
+    fun prepareLeaderBoardText(roundsCount: Int, leaders: Map<String, Int>): String {
+        return "=====================\n```\nЗа прошедшую неделю сыграно: $roundsCount раунда(ов).\nТаблица лидеров этой группы (Топ 5):\n" +
+                leaders.entries
+                    .stream()
+                    .sorted(comparingByValue(Comparator.reverseOrder()))
+                    .limit(5)
+                    .map { (key, value): Map.Entry<String, Int> -> "$key: {$value}" }
                     .collect(Collectors.joining("\n")) + "```"
     }
 }
