@@ -1,6 +1,10 @@
 package org.example.botfarm.service
 
 import com.github.kotlintelegrambot.entities.Message
+import java.time.LocalDateTime
+import java.util.Map.Entry.comparingByValue
+import java.util.concurrent.ConcurrentMap
+import java.util.regex.Pattern
 import org.example.botfarm.entity.PlayerInRound
 import org.example.botfarm.entity.PokerRound
 import org.example.botfarm.entity.Result
@@ -8,10 +12,6 @@ import org.example.botfarm.entity.RoundResult
 import org.example.botfarm.util.Command
 import org.example.botfarm.util.DiceUtil
 import org.example.botfarm.util.StringUtil
-import java.time.LocalDateTime
-import java.util.Map.Entry.comparingByValue
-import java.util.concurrent.ConcurrentMap
-import java.util.regex.Pattern
 
 class RoundService(
     private val playerService: PlayerService,
@@ -19,6 +19,11 @@ class RoundService(
     private val scoreService: ScoreService,
     private val rounds: ConcurrentMap<Long, PokerRound>,
 ) {
+    companion object {
+        private const val DAYS: Long = 7
+        private const val NEW_PLAYER_ACTIONS = 2
+    }
+
     fun getNameOrUsername(message: Message): String {
         return message.from?.firstName.takeIf { it!!.isNotBlank() } ?: message.from?.username ?: ""
     }
@@ -51,7 +56,7 @@ class RoundService(
         val playerId: Long = message.from!!.id
         if (checkRoundAvailable(groupId, playerId)) {
             val pr = rounds[groupId]
-            pr!!.actionCounter = pr.actionCounter + 2
+            pr!!.actionCounter = pr.actionCounter + NEW_PLAYER_ACTIONS
 
             if (!playerService.existsPlayer(playerId)) {
                 playerService.addNewPlayer(
@@ -141,8 +146,8 @@ class RoundService(
         if (!rounds.containsKey(groupId)) return false
         val pr = rounds[groupId]
         return pr != null && pr.players.containsKey(playerId) &&
-            !pr.isEnded && !pr.players[playerId]?.isRoll!! &&
-            pr.players[playerId]?.isReroll!! && pr.players[playerId]?.isPass!!
+                !pr.isEnded && !pr.players[playerId]?.isRoll!! &&
+                pr.players[playerId]?.isReroll!! && pr.players[playerId]?.isPass!!
     }
 
     private fun checkRoundAvailable(groupId: Long, playerId: Long): Boolean {
@@ -182,7 +187,7 @@ class RoundService(
     suspend fun getLeaderBoardByGroup(groupId: Long): Pair<Int, Map<String, Int>> {
         val results: List<Result> = resultService.findByGroupIdAndRoundTimeBetween(
             groupId,
-            LocalDateTime.now().minusDays(7),
+            LocalDateTime.now().minusDays(DAYS),
             LocalDateTime.now(),
         )
         val leaders: Map<String, Int> =
