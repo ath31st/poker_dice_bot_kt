@@ -35,6 +35,14 @@ Spring фреймворка, телеграм-версия - на Kotlin + Expos
     /stat - статистика раундов по текстовому каналу
     /help - описание работы бота, команды
 
+## Список использованных технологий
+
+1) Kotlin version: 1.9.0
+2) Exposed libs version: 0.44.0
+3) Sqlite3 version: 3.43.0.0
+4) Slf4j version: 2.0.7
+5) Wrapper for telegram-bot api version: 6.1.0
+
 ## Примеры работы
 
 Начало раунда:</br>
