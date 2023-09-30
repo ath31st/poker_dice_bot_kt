@@ -45,3 +45,7 @@ Spring фреймворка, телеграм-версия - на Kotlin + Expos
 ![image info](images/reroll.jpg)</br>
 Вызов статистики по каналу:</br>
 ![image info](images/stat.jpg)</br>
+Возможные комбинации костей:</br>
+![image info](images/combo.jpg)</br>
+Информация и правила игры:</br>
+![image info](images/help.jpg)</br>
