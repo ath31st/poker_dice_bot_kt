@@ -1,8 +1,8 @@
 package org.example.botfarm.scheduler
 
-import org.example.botfarm.entity.PokerRound
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentMap
+import org.example.botfarm.entity.PokerRound
 
 object PokerDiceScheduler {
     private const val DURATION = 5L

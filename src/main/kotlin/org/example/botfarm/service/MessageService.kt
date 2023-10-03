@@ -1,13 +1,13 @@
 package org.example.botfarm.service
 
+import java.util.Map.Entry.comparingByValue
+import java.util.stream.Collectors
 import org.example.botfarm.entity.PlayerInRound
 import org.example.botfarm.entity.RoundResult
 import org.example.botfarm.util.DiceUtil
 import org.example.botfarm.util.MessageEnum
 import org.example.botfarm.util.RandomPhrase
 import org.example.botfarm.util.StringUtil
-import java.util.Map.Entry.comparingByValue
-import java.util.stream.Collectors
 
 class MessageService {
     fun prepareTextAfterStartingRound(startRoundStatus: Int, playerName: String): String {
