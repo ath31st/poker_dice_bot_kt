@@ -12,8 +12,18 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 
+/**
+ * The `ResultService` class provides database operations related to game results.
+ * It implements the [ResultDao] interface for database access.
+ */
 class ResultService : ResultDao {
 
+    /**
+     * Converts a database [ResultRow] into a [Result] object.
+     *
+     * @param row The [ResultRow] representing a game result.
+     * @return A [Result] object populated with data from the [ResultRow].
+     */
     private fun resultRowToResult(row: ResultRow): Result {
         val winner = Players
             .select { Players.id eq row[Results.playerId] }
@@ -35,6 +45,12 @@ class ResultService : ResultDao {
         )
     }
 
+    /**
+     * Adds a new game result to the database.
+     *
+     * @param groupId The unique ID of the game group.
+     * @param winnerId The unique ID of the player who won the game.
+     */
     override suspend fun addNewResult(groupId: Long, winnerId: Long): Unit = dbQuery {
         Results.insert {
             it[Results.groupId] = groupId
@@ -43,6 +59,14 @@ class ResultService : ResultDao {
         }
     }
 
+    /**
+     * Retrieves game results for a specific game group within a specified time range.
+     *
+     * @param groupId The unique ID of the game group.
+     * @param roundTimeStart The start time of the time range.
+     * @param roundTimeEnd The end time of the time range.
+     * @return A list of [Result] objects representing game results within the specified time range.
+     */
     override suspend fun findByGroupIdAndRoundTimeBetween(
         groupId: Long,
         roundTimeStart: LocalDateTime,
