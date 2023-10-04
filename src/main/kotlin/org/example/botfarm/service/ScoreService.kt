@@ -14,8 +14,17 @@ import org.example.botfarm.util.DiceUtil.isTwoPair
 import org.example.botfarm.util.DiceUtil.scoreTwoPair
 import org.example.botfarm.util.DiceUtil.sequenceScore
 
+/**
+ * The `ScoreService` class provides methods for processing and scoring poker rounds.
+ */
 class ScoreService {
 
+    /**
+     * Processes the results of a poker round and calculates the scores for each player.
+     *
+     * @param pr The poker round to process.
+     * @return A map of player IDs and their corresponding round results.
+     */
     fun processingRoundResult(pr: PokerRound): Map<Long, RoundResult> {
         val result: MutableMap<Long, RoundResult> = HashMap()
 
@@ -25,6 +34,12 @@ class ScoreService {
         return result
     }
 
+    /**
+     * Calculates the round result based on the rolled dice values.
+     *
+     * @param dices The array of rolled dice values.
+     * @return A [RoundResult] object representing the score and combination of the round.
+     */
     private fun getRoundResult(dices: IntArray): RoundResult {
         return when {
             isPoker(dices) -> {
