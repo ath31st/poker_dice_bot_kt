@@ -13,6 +13,14 @@ import org.example.botfarm.util.Command
 import org.example.botfarm.util.DiceUtil
 import org.example.botfarm.util.StringUtil
 
+/**
+ * The `RoundService` class provides methods for managing poker rounds and game actions.
+ *
+ * @param playerService An instance of [PlayerService] for player-related operations.
+ * @param resultService An instance of [ResultService] for game result operations.
+ * @param scoreService An instance of [ScoreService] for scoring game rounds.
+ * @param rounds A concurrent map to store active poker rounds.
+ */
 class RoundService(
     private val playerService: PlayerService,
     private val resultService: ResultService,
@@ -24,10 +32,23 @@ class RoundService(
         private const val NEW_PLAYER_ACTIONS = 2
     }
 
+    /**
+     * Retrieves the name or username from a Telegram message.
+     *
+     * @param message The Telegram message.
+     * @return The first name if available, or the username if not, or an empty string.
+     */
     fun getNameOrUsername(message: Message): String {
         return message.from?.firstName.takeIf { it!!.isNotBlank() } ?: message.from?.username ?: ""
     }
 
+    /**
+     * Starts a new poker round for a group initiated by a player.
+     *
+     * @param groupId The unique ID of the group.
+     * @param playerInitiator The unique ID of the player initiating the round.
+     * @return Status codes: 1 for success, 0 for existing round, -1 for invalid parameters.
+     */
     fun startNewRound(groupId: Long, playerInitiator: Long): Int {
         val status: Int
         if (rounds.containsKey(groupId)) {
@@ -50,6 +71,13 @@ class RoundService(
         return status
     }
 
+    /**
+     * Rolls five dice for a player in the specified group.
+     *
+     * @param message The Telegram message.
+     * @param playerName The name of the player.
+     * @return An array of integers representing the rolled dice values.
+     */
     suspend fun rollDices(message: Message, playerName: String): IntArray {
         var rollDices = intArrayOf()
         val groupId: Long = message.chat.id
@@ -81,6 +109,12 @@ class RoundService(
         return rollDices
     }
 
+    /**
+     * Rerolls selected dice for a player in the specified group.
+     *
+     * @param message The Telegram message containing reroll instructions.
+     * @return A pair of integer arrays representing the first roll and rerolled dice values.
+     */
     fun rerollDices(message: Message): Pair<IntArray, IntArray> {
         var firstRoll = intArrayOf()
         var reroll = intArrayOf()
@@ -105,6 +139,12 @@ class RoundService(
         return Pair(firstRoll, reroll)
     }
 
+    /**
+     * Passes a player's turn in the specified group.
+     *
+     * @param message The Telegram message indicating the player's intention to pass.
+     * @return `true` if the pass is successful, `false` otherwise.
+     */
     fun pass(message: Message): Boolean {
         val groupId: Long = message.chat.id
         val playerId: Long = message.from!!.id
@@ -125,6 +165,12 @@ class RoundService(
         return resultPassing
     }
 
+    /**
+     * Finishes the current poker round initiated by a player in the specified group.
+     *
+     * @param message The Telegram message indicating the player's intention to finish the round.
+     * @return `true` if the round is successfully finished, `false` otherwise.
+     */
     fun finishRound(message: Message): Boolean {
         val groupId: Long = message.chat.id
         val playerId: Long = message.from!!.id
@@ -142,6 +188,13 @@ class RoundService(
         return resultFinishing
     }
 
+    /**
+     * Checks if reroll or pass actions are available for a player in the specified group.
+     *
+     * @param groupId The unique ID of the group.
+     * @param playerId The unique ID of the player.
+     * @return `true` if reroll or pass actions are available, `false` otherwise.
+     */
     private fun checkRerollOrPassAvailable(groupId: Long, playerId: Long): Boolean {
         if (!rounds.containsKey(groupId)) return false
         val pr = rounds[groupId]
@@ -150,6 +203,13 @@ class RoundService(
                 pr.players[playerId]?.isReroll!! && pr.players[playerId]?.isPass!!
     }
 
+    /**
+     * Checks if a poker round is available for a player in the specified group.
+     *
+     * @param groupId The unique ID of the group.
+     * @param playerId The unique ID of the player.
+     * @return `true` if a poker round is available, `false` otherwise.
+     */
     private fun checkRoundAvailable(groupId: Long, playerId: Long): Boolean {
         val result: Boolean = if (!rounds.containsKey(groupId)) {
             false
@@ -160,11 +220,23 @@ class RoundService(
         return result
     }
 
+    /**
+     * Checks if available actions have been exhausted in the specified group.
+     *
+     * @param groupId The unique ID of the group.
+     * @return `true` if available actions are exhausted and there are more than one player, `false` otherwise.
+     */
     fun checkAvailableActions(groupId: Long): Boolean {
         val pr = rounds[groupId]
         return pr?.actionCounter == 0 && pr.players.size > 1
     }
 
+    /**
+     * Saves the results of a poker round, processes the winner, and deletes the round.
+     *
+     * @param groupId The unique ID of the group.
+     * @return A map of player IDs and their corresponding round results.
+     */
     suspend fun saveResultsAndDeleteRound(groupId: Long): Map<Long, RoundResult> {
         val pr = rounds[groupId]
         var result: Map<Long, RoundResult> = mapOf()
@@ -184,6 +256,12 @@ class RoundService(
         return result
     }
 
+    /**
+     * Retrieves the leaderboard for a group based on recent game results.
+     *
+     * @param groupId The unique ID of the group.
+     * @return A pair containing the total number of rounds played and a map of player names and their scores.
+     */
     suspend fun getLeaderBoardByGroup(groupId: Long): Pair<Int, Map<String, Int>> {
         val results: List<Result> = resultService.findByGroupIdAndRoundTimeBetween(
             groupId,
