@@ -1,5 +1,10 @@
 package org.example.botfarm.util
 
+/**
+ * The `MessageEnum` enum class defines messages used in the poker game bot.
+ *
+ * @property value The string value associated with the message.
+ */
 enum class MessageEnum(val value: String) {
     TABLE_BUSY("Извините, игровой стол сейчас занят, но вы можете присоединиться к игре - бросайте кубики /${Command.ROLL.value}!"),
     ISSUE_WITH_GROUP_ID_OR_PLAYER_ID("Возникла проблема с определением id группы или игрока"),

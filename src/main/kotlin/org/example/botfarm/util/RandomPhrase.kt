@@ -2,6 +2,9 @@ package org.example.botfarm.util
 
 import kotlin.random.Random
 
+/**
+ * The `RandomPhrase` object generates random phrases for different game events in the poker bot.
+ */
 object RandomPhrase {
     private val autoPass = listOf(
         "Угадайте, что снится %s? Автоматический пропуск хода! Принесите ему(ей) одеяло",
