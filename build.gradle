@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.9.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.10'
     id 'application'
 }
 
@@ -9,13 +9,12 @@ version = '1.0-SNAPSHOT'
 ext {
     exposedVersion = "0.44.0"
     sqliteVersion = "3.43.0.0"
-    kotlinTelegramBotVersion = "6.1.0"
+    tgbotapiVersion = "9.2.1"
     slf4jVersion = "2.0.7"
 }
 
 repositories {
     mavenCentral()
-    maven { url "https://jitpack.io" }
 }
 
 dependencies {
@@ -25,8 +24,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
 
     implementation("org.xerial:sqlite-jdbc:$sqliteVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0")
-    implementation("io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:$kotlinTelegramBotVersion")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10")
+    implementation("dev.inmo:tgbotapi:$tgbotapiVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
     testImplementation('org.jetbrains.kotlin:kotlin-test:1.8.10')

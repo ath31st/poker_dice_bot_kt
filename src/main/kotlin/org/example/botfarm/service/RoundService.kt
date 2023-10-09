@@ -1,6 +1,5 @@
 package org.example.botfarm.service
 
-import com.github.kotlintelegrambot.entities.Message
 import java.time.LocalDateTime
 import java.util.Map.Entry.comparingByValue
 import java.util.concurrent.ConcurrentMap
@@ -38,9 +37,9 @@ class RoundService(
      * @param message The Telegram message.
      * @return The first name if available, or the username if not, or an empty string.
      */
-    fun getNameOrUsername(message: Message): String {
-        return message.from?.firstName.takeIf { it!!.isNotBlank() } ?: message.from?.username ?: ""
-    }
+//    fun getNameOrUsername(message: Message): String {
+//        return message.from?.firstName.takeIf { it!!.isNotBlank() } ?: message.from?.username ?: ""
+//    }
 
     /**
      * Starts a new poker round for a group initiated by a player.
@@ -78,36 +77,36 @@ class RoundService(
      * @param playerName The name of the player.
      * @return An array of integers representing the rolled dice values.
      */
-    suspend fun rollDices(message: Message, playerName: String): IntArray {
-        var rollDices = intArrayOf()
-        val groupId: Long = message.chat.id
-        val playerId: Long = message.from!!.id
-        if (checkRoundAvailable(groupId, playerId)) {
-            val pr = rounds[groupId]
-            pr!!.actionCounter = pr.actionCounter + NEW_PLAYER_ACTIONS
-
-            if (!playerService.existsPlayer(playerId)) {
-                playerService.addNewPlayer(
-                    playerId,
-                    username = message.from!!.username ?: "",
-                    firstName = message.from!!.firstName,
-                    lastName = message.from!!.lastName ?: "",
-                )
-            } else {
-                playerService.checkAndUpdateFirstName(playerId, playerName)
-            }
-
-            rollDices = DiceUtil.roll5d6()
-
-            val pir = playerService.createPiR()
-            pir.name = playerName
-            pir.dices = rollDices
-            pir.isRoll = false
-            pr.players[playerId] = pir
-            pr.actionCounter -= 1
-        }
-        return rollDices
-    }
+//    suspend fun rollDices(message: Message, playerName: String): IntArray {
+//        var rollDices = intArrayOf()
+//        val groupId: Long = message.chat.id
+//        val playerId: Long = message.from!!.id
+//        if (checkRoundAvailable(groupId, playerId)) {
+//            val pr = rounds[groupId]
+//            pr!!.actionCounter = pr.actionCounter + NEW_PLAYER_ACTIONS
+//
+//            if (!playerService.existsPlayer(playerId)) {
+//                playerService.addNewPlayer(
+//                    playerId,
+//                    username = message.from!!.username ?: "",
+//                    firstName = message.from!!.firstName,
+//                    lastName = message.from!!.lastName ?: "",
+//                )
+//            } else {
+//                playerService.checkAndUpdateFirstName(playerId, playerName)
+//            }
+//
+//            rollDices = DiceUtil.roll5d6()
+//
+//            val pir = playerService.createPiR()
+//            pir.name = playerName
+//            pir.dices = rollDices
+//            pir.isRoll = false
+//            pr.players[playerId] = pir
+//            pr.actionCounter -= 1
+//        }
+//        return rollDices
+//    }
 
     /**
      * Rerolls selected dice for a player in the specified group.
@@ -115,29 +114,29 @@ class RoundService(
      * @param message The Telegram message containing reroll instructions.
      * @return A pair of integer arrays representing the first roll and rerolled dice values.
      */
-    fun rerollDices(message: Message): Pair<IntArray, IntArray> {
-        var firstRoll = intArrayOf()
-        var reroll = intArrayOf()
-        val groupId: Long = message.chat.id
-        val playerId: Long = message.from?.id ?: 0
-        if (checkRerollOrPassAvailable(groupId, playerId)) {
-            val pattern = Pattern.compile(("^/" + Command.REROLL.value) + "(\\s+[1-6]){1,5}$")
-            val matcher = pattern.matcher(message.text!!)
-            if (matcher.matches()) {
-                val pr = rounds[groupId]
-                val pir = pr?.players?.get(playerId)
-                reroll = StringUtil.getRerollNumbers(message.text!!)
-                firstRoll = pir?.dices!!
-                DiceUtil.reroll(firstRoll, reroll)
-                pir.dices = firstRoll
-                pir.isReroll = false
-                pir.isPass = false
-                pr.players[playerId] = pir
-                pr.actionCounter -= 1
-            }
-        }
-        return Pair(firstRoll, reroll)
-    }
+//    fun rerollDices(message: Message): Pair<IntArray, IntArray> {
+//        var firstRoll = intArrayOf()
+//        var reroll = intArrayOf()
+//        val groupId: Long = message.chat.id
+//        val playerId: Long = message.from?.id ?: 0
+//        if (checkRerollOrPassAvailable(groupId, playerId)) {
+//            val pattern = Pattern.compile(("^/" + Command.REROLL.value) + "(\\s+[1-6]){1,5}$")
+//            val matcher = pattern.matcher(message.text!!)
+//            if (matcher.matches()) {
+//                val pr = rounds[groupId]
+//                val pir = pr?.players?.get(playerId)
+//                reroll = StringUtil.getRerollNumbers(message.text!!)
+//                firstRoll = pir?.dices!!
+//                DiceUtil.reroll(firstRoll, reroll)
+//                pir.dices = firstRoll
+//                pir.isReroll = false
+//                pir.isPass = false
+//                pr.players[playerId] = pir
+//                pr.actionCounter -= 1
+//            }
+//        }
+//        return Pair(firstRoll, reroll)
+//    }
 
     /**
      * Passes a player's turn in the specified group.
@@ -145,25 +144,25 @@ class RoundService(
      * @param message The Telegram message indicating the player's intention to pass.
      * @return `true` if the pass is successful, `false` otherwise.
      */
-    fun pass(message: Message): Boolean {
-        val groupId: Long = message.chat.id
-        val playerId: Long = message.from!!.id
-        val resultPassing: Boolean
-        if (checkRerollOrPassAvailable(groupId, playerId)) {
-            val pr = rounds[groupId]
-            val pir = pr?.players?.get(playerId)
-            if (pir != null) {
-                pir.isReroll = false
-                pir.isPass = false
-                pr.players[playerId] = pir
-                pr.actionCounter -= 1
-            }
-            resultPassing = true
-        } else {
-            resultPassing = false
-        }
-        return resultPassing
-    }
+//    fun pass(message: Message): Boolean {
+//        val groupId: Long = message.chat.id
+//        val playerId: Long = message.from!!.id
+//        val resultPassing: Boolean
+//        if (checkRerollOrPassAvailable(groupId, playerId)) {
+//            val pr = rounds[groupId]
+//            val pir = pr?.players?.get(playerId)
+//            if (pir != null) {
+//                pir.isReroll = false
+//                pir.isPass = false
+//                pr.players[playerId] = pir
+//                pr.actionCounter -= 1
+//            }
+//            resultPassing = true
+//        } else {
+//            resultPassing = false
+//        }
+//        return resultPassing
+//    }
 
     /**
      * Finishes the current poker round initiated by a player in the specified group.
@@ -171,22 +170,22 @@ class RoundService(
      * @param message The Telegram message indicating the player's intention to finish the round.
      * @return `true` if the round is successfully finished, `false` otherwise.
      */
-    fun finishRound(message: Message): Boolean {
-        val groupId: Long = message.chat.id
-        val playerId: Long = message.from!!.id
-        val resultFinishing: Boolean
-        if (rounds.containsKey(groupId) && ((rounds[groupId]?.playerInitiator ?: 0) == playerId)) {
-            val pr = rounds[groupId]
-            if (pr != null) {
-                pr.isEnded = true
-            }
-            rounds.remove(groupId)
-            resultFinishing = true
-        } else {
-            resultFinishing = false
-        }
-        return resultFinishing
-    }
+//    fun finishRound(message: Message): Boolean {
+//        val groupId: Long = message.chat.id
+//        val playerId: Long = message.from!!.id
+//        val resultFinishing: Boolean
+//        if (rounds.containsKey(groupId) && ((rounds[groupId]?.playerInitiator ?: 0) == playerId)) {
+//            val pr = rounds[groupId]
+//            if (pr != null) {
+//                pr.isEnded = true
+//            }
+//            rounds.remove(groupId)
+//            resultFinishing = true
+//        } else {
+//            resultFinishing = false
+//        }
+//        return resultFinishing
+//    }
 
     /**
      * Checks if reroll or pass actions are available for a player in the specified group.
