@@ -5,9 +5,13 @@ import dev.inmo.tgbotapi.extensions.api.send.sendTextMessage
 import dev.inmo.tgbotapi.extensions.api.telegramBot
 import dev.inmo.tgbotapi.extensions.behaviour_builder.buildBehaviourWithLongPolling
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommand
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.from
+import dev.inmo.tgbotapi.extensions.utils.fromUserOrNull
 import dev.inmo.tgbotapi.types.ChatId
 import dev.inmo.tgbotapi.types.message.MarkdownParseMode
 import dev.inmo.tgbotapi.types.message.ParseMode
+import dev.inmo.tgbotapi.utils.PreviewFeature
+import dev.inmo.tgbotapi.utils.RiskFeature
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.Executors
@@ -45,6 +49,7 @@ object AppKt {
      *
      * @param args An array of command-line arguments, where the first argument should be the bot token.
      */
+    @OptIn(RiskFeature::class, PreviewFeature::class)
     @JvmStatic
     fun main(args: Array<String>) {
         DatabaseFactory.init()
@@ -65,6 +70,21 @@ object AppKt {
                     )
                 }
 
+                onCommand(Command.START.value) {
+                    val groupId = it.chat.id.chatId
+                    val playerInitiator = it.from?.id?.chatId ?: 0
+                    val playerName = roundService.getNameOrUsername(it.from)
+                    val startRoundStatus = roundService.startNewRound(groupId, playerInitiator)
+                    sendTextMessage(
+                        chatId = it.chat.id,
+                        disableNotification = true,
+                        parseMode = MarkdownParseMode,
+                        text = messageService.prepareTextAfterStartingRound(
+                            startRoundStatus,
+                            playerName,
+                        ),
+                    )
+                }
 
             }.join()
         }
@@ -113,22 +133,7 @@ object AppKt {
 //            }, 10, 15, TimeUnit.SECONDS)
 //        }
 //    }
-//
-//    /**
-//     * Handles the '/help' command by sending a help message with instructions to the group or chat.
-//     */
-//    private fun Dispatcher.help() {
-//        command(Command.HELP.value) {
-//            val groupId = update.message?.chat?.id ?: 0
-//            bot.sendMessage(
-//                chatId = ChatId.fromId(groupId),
-//                disableNotification = true,
-//                parseMode = ParseMode.MARKDOWN,
-//                text = MessageEnum.HELP.value,
-//            )
-//        }
-//    }
-//
+
 //    /**
 //     * Handles the '/finish' command, allowing the round initiator to prematurely finish the round.
 //     */
@@ -224,26 +229,6 @@ object AppKt {
 //            )
 //        }
 //    }
-//
-//    /**
-//     * Handles the '/start' command, allowing a player to initiate a new poker round.
-//     */
-//    private fun Dispatcher.start() {
-//        command(Command.START.value) {
-//            val groupId = update.message?.chat?.id ?: 0
-//            val playerInitiator = update.message?.from?.id ?: 0
-//            val playerName = roundService.getNameOrUsername(message)
-//            val startRoundStatus = roundService.startNewRound(groupId, playerInitiator)
-//            bot.sendMessage(
-//                chatId = ChatId.fromId(groupId),
-//                text = messageService.prepareTextAfterStartingRound(
-//                    startRoundStatus,
-//                    playerName,
-//                ),
-//            )
-//        }
-//    }
-//
 //    /**
 //     * Handles the '/combination' command, providing a list of valid poker combinations.
 //     */

@@ -1,5 +1,8 @@
 package org.example.botfarm.service
 
+import dev.inmo.tgbotapi.abstracts.FromUser
+import dev.inmo.tgbotapi.extensions.utils.ifUser
+import dev.inmo.tgbotapi.types.chat.User
 import java.time.LocalDateTime
 import java.util.Map.Entry.comparingByValue
 import java.util.concurrent.ConcurrentMap
@@ -32,14 +35,14 @@ class RoundService(
     }
 
     /**
-     * Retrieves the name or username from a Telegram message.
+     * Retrieves the name or username from a Telegram user.
      *
-     * @param message The Telegram message.
+     * @param user The Telegram user.
      * @return The first name if available, or the username if not, or an empty string.
      */
-//    fun getNameOrUsername(message: Message): String {
-//        return message.from?.firstName.takeIf { it!!.isNotBlank() } ?: message.from?.username ?: ""
-//    }
+    fun getNameOrUsername(user: User?): String {
+        return user?.firstName.takeIf { it!!.isNotBlank() } ?: user?.username?.username ?: ""
+    }
 
     /**
      * Starts a new poker round for a group initiated by a player.
