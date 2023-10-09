@@ -5,6 +5,7 @@ import dev.inmo.tgbotapi.extensions.api.send.sendTextMessage
 import dev.inmo.tgbotapi.extensions.api.telegramBot
 import dev.inmo.tgbotapi.extensions.behaviour_builder.buildBehaviourWithLongPolling
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommand
+import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommandWithArgs
 import dev.inmo.tgbotapi.extensions.utils.extensions.raw.from
 import dev.inmo.tgbotapi.types.message.MarkdownParseMode
 import dev.inmo.tgbotapi.utils.RiskFeature
@@ -107,6 +108,34 @@ object AppKt {
                     )
                 }
 
+                onCommandWithArgs(Command.REROLL.value) { message, _ ->
+                    val groupId = message.chat.id.chatId
+                    val playerName = roundService.getNameOrUsername(message.from)
+                    val playerId = message.from?.id?.chatId ?: 0
+                    val rolls = roundService.rerollDices(groupId, playerId, message.content.text)
+                    sendTextMessage(
+                        chatId = message.chat.id,
+                        disableNotification = true,
+                        text = messageService.prepareTextAfterRerollDices(
+                            rolls.first,
+                            rolls.second,
+                            playerName,
+                        ),
+                    )
+                    if (roundService.checkAvailableActions(groupId)) {
+                        val round = rounds[groupId]
+                        val result = roundService.saveResultsAndDeleteRound(groupId)
+                        sendTextMessage(
+                            chatId = message.chat.id,
+                            disableNotification = true,
+                            text = messageService.prepareResultText(
+                                result,
+                                round!!.players,
+                            ),
+                        )
+                    }
+                }
+
             }.join()
         }
     }
@@ -186,39 +215,6 @@ object AppKt {
 //                    text = messageService.prepareTextAfterPass(playerName),
 //                )
 //            }
-//            if (roundService.checkAvailableActions(groupId)) {
-//                val round = rounds[groupId]
-//                val result = roundService.saveResultsAndDeleteRound(groupId)
-//                bot.sendMessage(
-//                    chatId = ChatId.fromId(groupId),
-//                    disableNotification = true,
-//                    parseMode = ParseMode.MARKDOWN,
-//                    text = messageService.prepareResultText(
-//                        result,
-//                        round!!.players,
-//                    ),
-//                )
-//            }
-//        }
-//    }
-//
-//    /**
-//     * Handles the '/reroll' command, allowing a player to reroll selected dice during their turn.
-//     */
-//    private fun Dispatcher.reroll() {
-//        command(Command.REROLL.value) {
-//            val groupId = update.message?.chat?.id ?: 0
-//            val playerName = roundService.getNameOrUsername(message)
-//            val rolls = roundService.rerollDices(message)
-//            bot.sendMessage(
-//                chatId = ChatId.fromId(groupId),
-//                disableNotification = true,
-//                text = messageService.prepareTextAfterRerollDices(
-//                    rolls.first,
-//                    rolls.second,
-//                    playerName,
-//                ),
-//            )
 //            if (roundService.checkAvailableActions(groupId)) {
 //                val round = rounds[groupId]
 //                val result = roundService.saveResultsAndDeleteRound(groupId)

@@ -1,17 +1,21 @@
 package org.example.botfarm.service
 
 import dev.inmo.tgbotapi.extensions.utils.extensions.raw.from
+import dev.inmo.tgbotapi.types.Identifier
 import dev.inmo.tgbotapi.types.chat.User
 import dev.inmo.tgbotapi.types.message.abstracts.CommonMessage
 import dev.inmo.tgbotapi.utils.RiskFeature
 import java.time.LocalDateTime
 import java.util.Map.Entry.comparingByValue
 import java.util.concurrent.ConcurrentMap
+import java.util.regex.Pattern
 import org.example.botfarm.entity.PlayerInRound
 import org.example.botfarm.entity.PokerRound
 import org.example.botfarm.entity.Result
 import org.example.botfarm.entity.RoundResult
+import org.example.botfarm.util.Command
 import org.example.botfarm.util.DiceUtil
+import org.example.botfarm.util.StringUtil
 
 /**
  * The `RoundService` class provides methods for managing poker rounds and game actions.
@@ -114,34 +118,40 @@ class RoundService(
     }
 
     /**
-     * Rerolls selected dice for a player in the specified group.
+     * Rerolls the selected dice for a player within the specified group based on Telegram message
+     * instructions.
      *
-     * @param message The Telegram message containing reroll instructions.
-     * @return A pair of integer arrays representing the first roll and rerolled dice values.
+     * @param groupId The identifier for the group where the reroll action takes place.
+     * @param playerId The identifier for the player who is rerolling their dice.
+     * @param text The text containing reroll instructions in the Telegram message.
+     * @return A pair of integer arrays representing the initial roll and the resulting rerolled
+     * dice values.
      */
-//    fun rerollDices(message: Message): Pair<IntArray, IntArray> {
-//        var firstRoll = intArrayOf()
-//        var reroll = intArrayOf()
-//        val groupId: Long = message.chat.id
-//        val playerId: Long = message.from?.id ?: 0
-//        if (checkRerollOrPassAvailable(groupId, playerId)) {
-//            val pattern = Pattern.compile(("^/" + Command.REROLL.value) + "(\\s+[1-6]){1,5}$")
-//            val matcher = pattern.matcher(message.text!!)
-//            if (matcher.matches()) {
-//                val pr = rounds[groupId]
-//                val pir = pr?.players?.get(playerId)
-//                reroll = StringUtil.getRerollNumbers(message.text!!)
-//                firstRoll = pir?.dices!!
-//                DiceUtil.reroll(firstRoll, reroll)
-//                pir.dices = firstRoll
-//                pir.isReroll = false
-//                pir.isPass = false
-//                pr.players[playerId] = pir
-//                pr.actionCounter -= 1
-//            }
-//        }
-//        return Pair(firstRoll, reroll)
-//    }
+    fun rerollDices(
+        groupId: Identifier,
+        playerId: Identifier,
+        text: String
+    ): Pair<IntArray, IntArray> {
+        var firstRoll = intArrayOf()
+        var reroll = intArrayOf()
+        if (checkRerollOrPassAvailable(groupId, playerId)) {
+            val pattern = Pattern.compile(("^/" + Command.REROLL.value) + "(\\s+[1-6]){1,5}$")
+            val matcher = pattern.matcher(text)
+            if (matcher.matches()) {
+                val pr = rounds[groupId]
+                val pir = pr?.players?.get(playerId)
+                reroll = StringUtil.getRerollNumbers(text)
+                firstRoll = pir?.dices!!
+                DiceUtil.reroll(firstRoll, reroll)
+                pir.dices = firstRoll
+                pir.isReroll = false
+                pir.isPass = false
+                pr.players[playerId] = pir
+                pr.actionCounter -= 1
+            }
+        }
+        return Pair(firstRoll, reroll)
+    }
 
     /**
      * Passes a player's turn in the specified group.
