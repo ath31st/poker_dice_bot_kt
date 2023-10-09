@@ -1,19 +1,17 @@
 package org.example.botfarm.service
 
-import dev.inmo.tgbotapi.abstracts.FromUser
-import dev.inmo.tgbotapi.extensions.utils.ifUser
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.from
 import dev.inmo.tgbotapi.types.chat.User
+import dev.inmo.tgbotapi.types.message.abstracts.CommonMessage
+import dev.inmo.tgbotapi.utils.RiskFeature
 import java.time.LocalDateTime
 import java.util.Map.Entry.comparingByValue
 import java.util.concurrent.ConcurrentMap
-import java.util.regex.Pattern
 import org.example.botfarm.entity.PlayerInRound
 import org.example.botfarm.entity.PokerRound
 import org.example.botfarm.entity.Result
 import org.example.botfarm.entity.RoundResult
-import org.example.botfarm.util.Command
 import org.example.botfarm.util.DiceUtil
-import org.example.botfarm.util.StringUtil
 
 /**
  * The `RoundService` class provides methods for managing poker rounds and game actions.
@@ -80,36 +78,40 @@ class RoundService(
      * @param playerName The name of the player.
      * @return An array of integers representing the rolled dice values.
      */
-//    suspend fun rollDices(message: Message, playerName: String): IntArray {
-//        var rollDices = intArrayOf()
-//        val groupId: Long = message.chat.id
-//        val playerId: Long = message.from!!.id
-//        if (checkRoundAvailable(groupId, playerId)) {
-//            val pr = rounds[groupId]
-//            pr!!.actionCounter = pr.actionCounter + NEW_PLAYER_ACTIONS
-//
-//            if (!playerService.existsPlayer(playerId)) {
-//                playerService.addNewPlayer(
-//                    playerId,
-//                    username = message.from!!.username ?: "",
-//                    firstName = message.from!!.firstName,
-//                    lastName = message.from!!.lastName ?: "",
-//                )
-//            } else {
-//                playerService.checkAndUpdateFirstName(playerId, playerName)
-//            }
-//
-//            rollDices = DiceUtil.roll5d6()
-//
-//            val pir = playerService.createPiR()
-//            pir.name = playerName
-//            pir.dices = rollDices
-//            pir.isRoll = false
-//            pr.players[playerId] = pir
-//            pr.actionCounter -= 1
-//        }
-//        return rollDices
-//    }
+    @OptIn(RiskFeature::class)
+    suspend fun rollDices(
+        message: CommonMessage<dev.inmo.tgbotapi.types.message.content.TextContent>,
+        playerName: String
+    ): IntArray {
+        var rollDices = intArrayOf()
+        val groupId: Long = message.chat.id.chatId
+        val playerId: Long = message.from?.id?.chatId ?: 0
+        if (checkRoundAvailable(groupId, playerId)) {
+            val pr = rounds[groupId]
+            pr!!.actionCounter = pr.actionCounter + NEW_PLAYER_ACTIONS
+
+            if (!playerService.existsPlayer(playerId)) {
+                playerService.addNewPlayer(
+                    playerId,
+                    username = message.from?.username?.username ?: "",
+                    firstName = message.from?.firstName ?: "",
+                    lastName = message.from?.lastName ?: "",
+                )
+            } else {
+                playerService.checkAndUpdateFirstName(playerId, playerName)
+            }
+
+            rollDices = DiceUtil.roll5d6()
+
+            val pir = playerService.createPiR()
+            pir.name = playerName
+            pir.dices = rollDices
+            pir.isRoll = false
+            pr.players[playerId] = pir
+            pr.actionCounter -= 1
+        }
+        return rollDices
+    }
 
     /**
      * Rerolls selected dice for a player in the specified group.

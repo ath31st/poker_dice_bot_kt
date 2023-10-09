@@ -6,23 +6,14 @@ import dev.inmo.tgbotapi.extensions.api.telegramBot
 import dev.inmo.tgbotapi.extensions.behaviour_builder.buildBehaviourWithLongPolling
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommand
 import dev.inmo.tgbotapi.extensions.utils.extensions.raw.from
-import dev.inmo.tgbotapi.extensions.utils.fromUserOrNull
-import dev.inmo.tgbotapi.types.ChatId
 import dev.inmo.tgbotapi.types.message.MarkdownParseMode
-import dev.inmo.tgbotapi.types.message.ParseMode
-import dev.inmo.tgbotapi.utils.PreviewFeature
 import dev.inmo.tgbotapi.utils.RiskFeature
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.example.botfarm.entity.PokerRound
-import org.example.botfarm.scheduler.PokerDiceScheduler
 import org.example.botfarm.service.MessageService
 import org.example.botfarm.service.PlayerService
 import org.example.botfarm.service.ResultService
@@ -49,7 +40,7 @@ object AppKt {
      *
      * @param args An array of command-line arguments, where the first argument should be the bot token.
      */
-    @OptIn(RiskFeature::class, PreviewFeature::class)
+    @OptIn(RiskFeature::class)
     @JvmStatic
     fun main(args: Array<String>) {
         DatabaseFactory.init()
@@ -70,6 +61,15 @@ object AppKt {
                     )
                 }
 
+                onCommand(Command.COMBINATION.value) {
+                    sendTextMessage(
+                        chatId = it.chat.id,
+                        disableNotification = true,
+                        parseMode = MarkdownParseMode,
+                        text = MessageEnum.COMBINATION.value,
+                    )
+                }
+
                 onCommand(Command.START.value) {
                     val groupId = it.chat.id.chatId
                     val playerInitiator = it.from?.id?.chatId ?: 0
@@ -83,6 +83,27 @@ object AppKt {
                             startRoundStatus,
                             playerName,
                         ),
+                    )
+                }
+
+                onCommand(Command.STATISTICS.value) {
+                    val groupId = it.chat.id.chatId
+                    val leaders = roundService.getLeaderBoardByGroup(groupId)
+                    sendTextMessage(
+                        chatId = it.chat.id,
+                        disableNotification = true,
+                        parseMode = MarkdownParseMode,
+                        text = messageService.prepareLeaderBoardText(leaders.first, leaders.second),
+                    )
+                }
+
+                onCommand(Command.ROLL.value) {
+                    val playerName = roundService.getNameOrUsername(it.from)
+                    val rollDices = roundService.rollDices(it, playerName)
+                    sendTextMessage(
+                        chatId = it.chat.id,
+                        disableNotification = true,
+                        text = messageService.prepareTextAfterRollDices(rollDices, playerName),
                     )
                 }
 
@@ -213,50 +234,5 @@ object AppKt {
 //            }
 //        }
 //    }
-//
-//    /**
-//     * Handles the '/roll' command, allowing a player to roll dice during their turn.
-//     */
-//    private fun Dispatcher.roll() {
-//        command(Command.ROLL.value) {
-//            val groupId = update.message?.chat?.id ?: 0
-//            val playerName = roundService.getNameOrUsername(message)
-//            val rollDices = update.message?.let { roundService.rollDices(it, playerName) }
-//            bot.sendMessage(
-//                chatId = ChatId.fromId(groupId),
-//                disableNotification = true,
-//                text = messageService.prepareTextAfterRollDices(rollDices, playerName),
-//            )
-//        }
-//    }
-//    /**
-//     * Handles the '/combination' command, providing a list of valid poker combinations.
-//     */
-//    private fun Dispatcher.combination() {
-//        command(Command.COMBINATION.value) {
-//            val groupId = update.message?.chat?.id ?: 0
-//            bot.sendMessage(
-//                chatId = ChatId.fromId(groupId),
-//                disableNotification = true,
-//                parseMode = ParseMode.MARKDOWN,
-//                text = MessageEnum.COMBINATION.value,
-//            )
-//        }
-//    }
-//
-//    /**
-//     * Handles the '/statistics' command, providing the leaderboard for the current group or chat.
-//     */
-//    private fun Dispatcher.statistics() {
-//        command(Command.STATISTICS.value) {
-//            val groupId = update.message?.chat?.id ?: 0
-//            val leaders = roundService.getLeaderBoardByGroup(groupId)
-//            bot.sendMessage(
-//                chatId = ChatId.fromId(groupId),
-//                disableNotification = true,
-//                parseMode = ParseMode.MARKDOWN,
-//                text = messageService.prepareLeaderBoardText(leaders.first, leaders.second),
-//            )
-//        }
-//    }
+
 }
