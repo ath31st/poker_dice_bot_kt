@@ -154,30 +154,29 @@ class RoundService(
     }
 
     /**
-     * Passes a player's turn in the specified group.
+     * Allows a player to pass their turn within the specified group.
      *
-     * @param message The Telegram message indicating the player's intention to pass.
-     * @return `true` if the pass is successful, `false` otherwise.
+     * @param groupId The identifier for the group where the pass action is taking place.
+     * @param playerId The identifier for the player who intends to pass.
+     * @return `true` if the pass is successfully executed, `false` otherwise.
      */
-//    fun pass(message: Message): Boolean {
-//        val groupId: Long = message.chat.id
-//        val playerId: Long = message.from!!.id
-//        val resultPassing: Boolean
-//        if (checkRerollOrPassAvailable(groupId, playerId)) {
-//            val pr = rounds[groupId]
-//            val pir = pr?.players?.get(playerId)
-//            if (pir != null) {
-//                pir.isReroll = false
-//                pir.isPass = false
-//                pr.players[playerId] = pir
-//                pr.actionCounter -= 1
-//            }
-//            resultPassing = true
-//        } else {
-//            resultPassing = false
-//        }
-//        return resultPassing
-//    }
+    fun pass(groupId: Identifier, playerId: Identifier): Boolean {
+        val resultPassing: Boolean
+        if (checkRerollOrPassAvailable(groupId, playerId)) {
+            val pr = rounds[groupId]
+            val pir = pr?.players?.get(playerId)
+            if (pir != null) {
+                pir.isReroll = false
+                pir.isPass = false
+                pr.players[playerId] = pir
+                pr.actionCounter -= 1
+            }
+            resultPassing = true
+        } else {
+            resultPassing = false
+        }
+        return resultPassing
+    }
 
     /**
      * Finishes the current poker round initiated by a player in the specified group.

@@ -136,6 +136,31 @@ object AppKt {
                     }
                 }
 
+                onCommand(Command.PASS.value) {
+                    val groupId = it.chat.id.chatId
+                    val playerName = roundService.getNameOrUsername(it.from)
+                    val playerId = it.from?.id?.chatId ?: 0
+                    if (roundService.pass(groupId, playerId)) {
+                        sendTextMessage(
+                            chatId = it.chat.id,
+                            disableNotification = true,
+                            text = messageService.prepareTextAfterPass(playerName),
+                        )
+                    }
+                    if (roundService.checkAvailableActions(groupId)) {
+                        val round = rounds[groupId]
+                        val result = roundService.saveResultsAndDeleteRound(groupId)
+                        sendTextMessage(
+                            chatId = it.chat.id,
+                            disableNotification = true,
+                            text = messageService.prepareResultText(
+                                result,
+                                round!!.players,
+                            ),
+                        )
+                    }
+                }
+
             }.join()
         }
     }
@@ -200,35 +225,4 @@ object AppKt {
 //            }
 //        }
 //    }
-//
-//    /**
-//     * Handles the '/pass' command, allowing a player to pass their turn during a round.
-//     */
-//    private fun Dispatcher.pass() {
-//        command(Command.PASS.value) {
-//            val groupId = update.message?.chat?.id ?: 0
-//            val playerName = roundService.getNameOrUsername(message)
-//            if (roundService.pass(message)) {
-//                bot.sendMessage(
-//                    chatId = ChatId.fromId(groupId),
-//                    disableNotification = true,
-//                    text = messageService.prepareTextAfterPass(playerName),
-//                )
-//            }
-//            if (roundService.checkAvailableActions(groupId)) {
-//                val round = rounds[groupId]
-//                val result = roundService.saveResultsAndDeleteRound(groupId)
-//                bot.sendMessage(
-//                    chatId = ChatId.fromId(groupId),
-//                    disableNotification = true,
-//                    parseMode = ParseMode.MARKDOWN,
-//                    text = messageService.prepareResultText(
-//                        result,
-//                        round!!.players,
-//                    ),
-//                )
-//            }
-//        }
-//    }
-
 }
