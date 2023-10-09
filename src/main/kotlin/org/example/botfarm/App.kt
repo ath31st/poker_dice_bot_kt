@@ -6,15 +6,22 @@ import dev.inmo.tgbotapi.extensions.api.telegramBot
 import dev.inmo.tgbotapi.extensions.behaviour_builder.buildBehaviourWithLongPolling
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommand
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommandWithArgs
+import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onText
 import dev.inmo.tgbotapi.extensions.utils.extensions.raw.from
+import dev.inmo.tgbotapi.types.ChatId
 import dev.inmo.tgbotapi.types.message.MarkdownParseMode
 import dev.inmo.tgbotapi.utils.RiskFeature
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.example.botfarm.entity.PokerRound
+import org.example.botfarm.scheduler.PokerDiceScheduler
 import org.example.botfarm.service.MessageService
 import org.example.botfarm.service.PlayerService
 import org.example.botfarm.service.ResultService
@@ -41,7 +48,7 @@ object AppKt {
      *
      * @param args An array of command-line arguments, where the first argument should be the bot token.
      */
-    @OptIn(RiskFeature::class)
+    @OptIn(RiskFeature::class, DelicateCoroutinesApi::class)
     @JvmStatic
     fun main(args: Array<String>) {
         DatabaseFactory.init()
@@ -128,6 +135,7 @@ object AppKt {
                         sendTextMessage(
                             chatId = message.chat.id,
                             disableNotification = true,
+                            parseMode = MarkdownParseMode,
                             text = messageService.prepareResultText(
                                 result,
                                 round!!.players,
@@ -153,6 +161,7 @@ object AppKt {
                         sendTextMessage(
                             chatId = it.chat.id,
                             disableNotification = true,
+                            parseMode = MarkdownParseMode,
                             text = messageService.prepareResultText(
                                 result,
                                 round!!.players,
@@ -174,51 +183,45 @@ object AppKt {
                     }
                 }
 
+                onText {
+                    scheduler.scheduleAtFixedRate({
+                        GlobalScope.launch {
+                            val autoCloseableRounds = PokerDiceScheduler.finalizeRounds(rounds)
+                            if (autoCloseableRounds.isNotEmpty()) {
+                                autoCloseableRounds.forEach {
+                                    val groupId = it.first
+                                    val round = rounds[groupId]
+                                    val result = roundService.saveResultsAndDeleteRound(groupId)
+                                    sendTextMessage(
+                                        chatId = ChatId(groupId),
+                                        disableNotification = true,
+                                        parseMode = MarkdownParseMode,
+                                        text = MessageEnum.TIME_EXPIRED.value,
+                                    )
+                                    it.second.forEach { playerName ->
+                                        sendTextMessage(
+                                            chatId = ChatId(groupId),
+                                            disableNotification = true,
+                                            parseMode = MarkdownParseMode,
+                                            text = messageService.prepareAutoPassText(playerName),
+                                        )
+                                    }
+                                    sendTextMessage(
+                                        chatId = ChatId(groupId),
+                                        disableNotification = true,
+                                        parseMode = MarkdownParseMode,
+                                        text = messageService.prepareResultText(
+                                            result,
+                                            round!!.players,
+                                        ),
+                                    )
+                                }
+                            }
+                        }
+                    }, 10, 15, TimeUnit.SECONDS)
+                }
+
             }.join()
         }
     }
-
-//    /**
-//     * Schedules automatic round finalizing and checks for rounds that have exceeded their time limit.
-//     */
-//    @OptIn(DelicateCoroutinesApi::class)
-//    private fun Dispatcher.scheduler() {
-//        text {
-//            scheduler.scheduleAtFixedRate({
-//                GlobalScope.launch {
-//                    val autoCloseableRounds = PokerDiceScheduler.finalizeRounds(rounds)
-//                    if (autoCloseableRounds.isNotEmpty()) {
-//                        autoCloseableRounds.forEach {
-//                            val groupId = it.first
-//                            val round = rounds[groupId]
-//                            val result = roundService.saveResultsAndDeleteRound(groupId)
-//                            bot.sendMessage(
-//                                chatId = ChatId.fromId(groupId),
-//                                disableNotification = true,
-//                                parseMode = ParseMode.MARKDOWN,
-//                                text = MessageEnum.TIME_EXPIRED.value,
-//                            )
-//                            it.second.forEach { playerName ->
-//                                bot.sendMessage(
-//                                    chatId = ChatId.fromId(groupId),
-//                                    disableNotification = true,
-//                                    parseMode = ParseMode.MARKDOWN,
-//                                    text = messageService.prepareAutoPassText(playerName),
-//                                )
-//                            }
-//                            bot.sendMessage(
-//                                chatId = ChatId.fromId(groupId),
-//                                disableNotification = true,
-//                                parseMode = ParseMode.MARKDOWN,
-//                                text = messageService.prepareResultText(
-//                                    result,
-//                                    round!!.players,
-//                                ),
-//                            )
-//                        }
-//                    }
-//                }
-//            }, 10, 15, TimeUnit.SECONDS)
-//        }
-//    }
 }
