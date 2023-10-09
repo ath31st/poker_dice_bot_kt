@@ -179,27 +179,26 @@ class RoundService(
     }
 
     /**
-     * Finishes the current poker round initiated by a player in the specified group.
+     * Concludes the current poker round initiated by a player within the specified group.
      *
-     * @param message The Telegram message indicating the player's intention to finish the round.
-     * @return `true` if the round is successfully finished, `false` otherwise.
+     * @param groupId The identifier for the group where the round is being concluded.
+     * @param playerId The identifier for the player who intends to finish the round.
+     * @return `true` if the round is successfully concluded, `false` otherwise.
      */
-//    fun finishRound(message: Message): Boolean {
-//        val groupId: Long = message.chat.id
-//        val playerId: Long = message.from!!.id
-//        val resultFinishing: Boolean
-//        if (rounds.containsKey(groupId) && ((rounds[groupId]?.playerInitiator ?: 0) == playerId)) {
-//            val pr = rounds[groupId]
-//            if (pr != null) {
-//                pr.isEnded = true
-//            }
-//            rounds.remove(groupId)
-//            resultFinishing = true
-//        } else {
-//            resultFinishing = false
-//        }
-//        return resultFinishing
-//    }
+    fun finishRound(groupId: Identifier, playerId: Identifier): Boolean {
+        val resultFinishing: Boolean
+        if (rounds.containsKey(groupId) && ((rounds[groupId]?.playerInitiator ?: 0) == playerId)) {
+            val pr = rounds[groupId]
+            if (pr != null) {
+                pr.isEnded = true
+            }
+            rounds.remove(groupId)
+            resultFinishing = true
+        } else {
+            resultFinishing = false
+        }
+        return resultFinishing
+    }
 
     /**
      * Checks if reroll or pass actions are available for a player in the specified group.

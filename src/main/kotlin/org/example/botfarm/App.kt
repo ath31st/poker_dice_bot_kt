@@ -161,6 +161,19 @@ object AppKt {
                     }
                 }
 
+                onCommand(Command.FINISH.value) {
+                    val groupId = it.chat.id.chatId
+                    val playerId = it.from?.id?.chatId ?: 0
+                    if (roundService.finishRound(groupId, playerId)) {
+                        val playerName = roundService.getNameOrUsername(it.from)
+                        sendTextMessage(
+                            chatId = it.chat.id,
+                            disableNotification = true,
+                            text = messageService.prepareTextAfterFinishRound(playerName),
+                        )
+                    }
+                }
+
             }.join()
         }
     }
@@ -206,23 +219,6 @@ object AppKt {
 //                    }
 //                }
 //            }, 10, 15, TimeUnit.SECONDS)
-//        }
-//    }
-
-//    /**
-//     * Handles the '/finish' command, allowing the round initiator to prematurely finish the round.
-//     */
-//    private fun Dispatcher.finish() {
-//        command(Command.FINISH.value) {
-//            if (roundService.finishRound(message)) {
-//                val groupId = update.message?.chat?.id ?: 0
-//                val playerName = roundService.getNameOrUsername(message)
-//                bot.sendMessage(
-//                    chatId = ChatId.fromId(groupId),
-//                    disableNotification = true,
-//                    text = messageService.prepareTextAfterFinishRound(playerName),
-//                )
-//            }
 //        }
 //    }
 }
