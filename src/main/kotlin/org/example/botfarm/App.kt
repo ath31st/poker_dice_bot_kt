@@ -3,6 +3,7 @@ package org.example.botfarm
 import dev.inmo.tgbotapi.extensions.api.bot.getMe
 import dev.inmo.tgbotapi.extensions.api.send.sendTextMessage
 import dev.inmo.tgbotapi.extensions.api.telegramBot
+import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.behaviour_builder.buildBehaviourWithLongPolling
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommand
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommandWithArgs
@@ -48,7 +49,7 @@ object AppKt {
      *
      * @param args An array of command-line arguments, where the first argument should be the bot token.
      */
-    @OptIn(RiskFeature::class, DelicateCoroutinesApi::class)
+    @OptIn(RiskFeature::class)
     @JvmStatic
     fun main(args: Array<String>) {
         DatabaseFactory.init()
@@ -184,44 +185,48 @@ object AppKt {
                 }
 
                 onText {
-                    scheduler.scheduleAtFixedRate({
-                        GlobalScope.launch {
-                            val autoCloseableRounds = PokerDiceScheduler.finalizeRounds(rounds)
-                            if (autoCloseableRounds.isNotEmpty()) {
-                                autoCloseableRounds.forEach {
-                                    val groupId = it.first
-                                    val round = rounds[groupId]
-                                    val result = roundService.saveResultsAndDeleteRound(groupId)
-                                    sendTextMessage(
-                                        chatId = ChatId(groupId),
-                                        disableNotification = true,
-                                        parseMode = MarkdownParseMode,
-                                        text = MessageEnum.TIME_EXPIRED.value,
-                                    )
-                                    it.second.forEach { playerName ->
-                                        sendTextMessage(
-                                            chatId = ChatId(groupId),
-                                            disableNotification = true,
-                                            parseMode = MarkdownParseMode,
-                                            text = messageService.prepareAutoPassText(playerName),
-                                        )
-                                    }
-                                    sendTextMessage(
-                                        chatId = ChatId(groupId),
-                                        disableNotification = true,
-                                        parseMode = MarkdownParseMode,
-                                        text = messageService.prepareResultText(
-                                            result,
-                                            round!!.players,
-                                        ),
-                                    )
-                                }
-                            }
-                        }
-                    }, 10, 15, TimeUnit.SECONDS)
+                    scheduler()
                 }
-
             }.join()
         }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun BehaviourContext.scheduler() {
+        scheduler.scheduleAtFixedRate({
+            GlobalScope.launch {
+                val autoCloseableRounds = PokerDiceScheduler.finalizeRounds(rounds)
+                if (autoCloseableRounds.isNotEmpty()) {
+                    autoCloseableRounds.forEach {
+                        val groupId = it.first
+                        val round = rounds[groupId]
+                        val result = roundService.saveResultsAndDeleteRound(groupId)
+                        sendTextMessage(
+                            chatId = ChatId(groupId),
+                            disableNotification = true,
+                            parseMode = MarkdownParseMode,
+                            text = MessageEnum.TIME_EXPIRED.value,
+                        )
+                        it.second.forEach { playerName ->
+                            sendTextMessage(
+                                chatId = ChatId(groupId),
+                                disableNotification = true,
+                                parseMode = MarkdownParseMode,
+                                text = messageService.prepareAutoPassText(playerName),
+                            )
+                        }
+                        sendTextMessage(
+                            chatId = ChatId(groupId),
+                            disableNotification = true,
+                            parseMode = MarkdownParseMode,
+                            text = messageService.prepareResultText(
+                                result,
+                                round!!.players,
+                            ),
+                        )
+                    }
+                }
+            }
+        }, 10, 15, TimeUnit.SECONDS)
     }
 }
