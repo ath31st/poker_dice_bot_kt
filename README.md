@@ -41,8 +41,7 @@ Spring фреймворка, телеграм-версия - на Kotlin + Expos
 2) Exposed libs version: 0.44.0
 3) Sqlite3 version: 3.43.0.0
 4) Slf4j version: 2.0.7</br>
-5) ~~Wrapper for telegram-bot api version: 6.1.0~~
-6) KTgBotApi version: 9.2.1 (update 10.10.2023)
+5) KTgBotApi version: 9.2.1 (update 10.10.2023)
 
 ## Примеры работы
 
